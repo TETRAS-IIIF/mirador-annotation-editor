@@ -7,6 +7,7 @@ import AnnotationFormFooter from './AnnotationFormFooter';
 import { TEMPLATE } from './AnnotationFormUtils';
 import TargetFormSection from './TargetFormSection';
 import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
+import { initalizeMaeAnnotation } from './utils';
 
 /** Tagging Template* */
 export default function TaggingTemplate(
@@ -19,27 +20,7 @@ export default function TaggingTemplate(
   },
 ) {
   const { t } = useTranslation();
-  let maeAnnotation = annotation;
-
-  if (!maeAnnotation.id) {
-    // If the annotation does not have maeData, the annotation was not created with mae
-    maeAnnotation = {
-      body: {
-        type: 'Image',
-        value: '',
-      },
-      maeData: {
-        target: null,
-        templateType: TEMPLATE.TAGGING_TYPE,
-      },
-      motivation: 'tagging',
-      target: null,
-    };
-  } else if (maeAnnotation.maeData.target.drawingState && typeof maeAnnotation.maeData.target.drawingState === 'string') {
-    maeAnnotation.maeData.target.drawingState = JSON.parse(
-      maeAnnotation.maeData.target.drawingState,
-    );
-  }
+  const maeAnnotation = initalizeMaeAnnotation(annotation, 'Image', 'tagging', TEMPLATE.TAGGING_TYPE);
 
   const [annotationState, setAnnotationState] = useState(maeAnnotation);
 
@@ -79,7 +60,6 @@ export default function TaggingTemplate(
       <Grid item>
         <Typography variant="formSectionTitle">
           {t('tag')}
-          {' '}
         </Typography>
       </Grid>
       <Grid item>
