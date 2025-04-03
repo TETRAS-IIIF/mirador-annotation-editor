@@ -7,6 +7,7 @@ import TargetFormSection from './TargetFormSection';
 import AnnotationFormFooter from './AnnotationFormFooter';
 import { TEMPLATE } from './AnnotationFormUtils';
 import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
+import StructuredData from './StructuredData';
 
 const DEFAULT_BODY_VALUE = 'Annotation';
 
@@ -43,17 +44,55 @@ function TextCommentTemplate(
   }
 
   const [annotationState, setAnnotationState] = useState(maeAnnotation);
+  const [descriptionList, setDescriptionList] = useState([]);
+  const [textEditorContent, setTextEditorContent] = useState(annotationState.body.value.split('structuredData')[0]);
+
+  useEffect(() => {
+    const descriptionListArray = [];
+    const parser = new DOMParser();
+
+    const doc = parser.parseFromString(annotationState.body.value.split('structuredData')[1], 'text/html');
+    const dlElement = doc.querySelector('dl');
+
+    if (dlElement) {
+      const dtElements = dlElement.querySelectorAll('dt');
+      const ddElements = dlElement.querySelectorAll('dd');
+
+      dtElements.forEach((dt, index) => {
+        descriptionListArray.push({
+          dd: ddElements[index].textContent.trim(),
+          dt: dt.textContent.trim(),
+        });
+      });
+    }
+
+    setDescriptionList(descriptionListArray);
+  }, [annotationState.body.value]);
 
   /**
-   * Update the annotation's Body
+   * Updates the description list
+    */
+  const updateDescriptionList = (value, title) => {
+    const listEntry = {
+      dd: value.target.value,
+      dt: title,
+    };
+    setDescriptionList((prevList) => {
+      const index = prevList.findIndex((item) => item.dt === title);
+      if (index !== -1) {
+        const updatedList = [...prevList];
+        updatedList[index] = { ...updatedList[index], dd: value.target.value };
+        return updatedList;
+      }
+      return [...prevList, listEntry];
+    });
+  };
+
+  /**
+   * Update the annotation's body
    * */
   const updateAnnotationTextualBodyValue = (newTextValue) => {
-    const newBody = annotationState.body;
-    newBody.value = newTextValue;
-    setAnnotationState({
-      ...annotationState,
-      body: newBody,
-    });
+    setTextEditorContent(newTextValue);
   };
 
   /** this code update annotationState with maeDate * */
@@ -77,12 +116,15 @@ function TextCommentTemplate(
     if (annotationState.body.value === '') {
       annotationState.body.value = DEFAULT_BODY_VALUE;
     }
+    annotationState.body.value = textEditorContent;
+    annotationState.body.value += `
+    structuredData
+    <dl>
+      ${descriptionList.map((item) => `<dt>${item.dt}</dt><dd>${item.dd}</dd>`).join('')}
+    </dl>
+  `;
     saveAnnotation(annotationState);
   };
-
-  useEffect(() => {
-
-  }, [annotationState.maeData.target]);
 
   return (
     <Grid container direction="column" spacing={2}>
@@ -97,8 +139,14 @@ function TextCommentTemplate(
       </Grid>
       <Grid item>
         <TextFormSection
-          annoHtml={annotationState.body.value}
+          annoHtml={textEditorContent}
           updateAnnotationBody={updateAnnotationTextualBodyValue}
+        />
+      </Grid>
+      <Grid item>
+        <StructuredData
+          descriptionList={descriptionList}
+          updateDescriptionList={updateDescriptionList}
         />
       </Grid>
       <Grid item>

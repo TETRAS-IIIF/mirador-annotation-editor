@@ -2,11 +2,13 @@ import mirador from 'mirador/dist/es/src/index';
 import annotationPlugins from '../../src';
 import LocalStorageAdapter from '../../src/annotationAdapter/LocalStorageAdapter';
 import { manifestsCatalog } from './manifestsCatalog';
+import structuredData from './structuredData';
 
 const config = {
   annotation: {
     adapter: (canvasId) => new LocalStorageAdapter(`localStorage://?canvasId=${canvasId}`, 'Anonymous User'),
     exportLocalStorageAnnotations: false, // display annotation JSON export button
+    structuredData,
   },
   annotations: {
     htmlSanitizationRuleSet: 'liberal',

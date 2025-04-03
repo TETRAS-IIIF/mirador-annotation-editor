@@ -151,7 +151,6 @@ const CanvasListItem = forwardRef((props, ref) => {
                 lastEditor={annotationData.lastEditor}
                 lastSavedDate={annotationData.lastSavedDate}
                 displayMode={TOOLTIP_MODE}
-                t={t}
               />
             )}
             >
