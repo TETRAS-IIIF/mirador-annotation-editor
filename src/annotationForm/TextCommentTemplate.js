@@ -17,7 +17,6 @@ function TextCommentTemplate(
     closeFormCompanionWindow,
     playerReferences,
     saveAnnotation,
-    t,
     windowId,
   },
 ) {
@@ -88,27 +87,24 @@ function TextCommentTemplate(
   return (
     <Grid container direction="column" spacing={2}>
       <Grid item>
-        <TextFormSection
-          annoHtml={annotationState.body.value}
-          updateAnnotationBody={updateAnnotationTextualBodyValue}
-          t={t}
-        />
-      </Grid>
-      <Grid item>
         <TargetFormSection
           onChangeTarget={updateTargetState}
           playerReferences={playerReferences}
           spatialTarget
-          t={t}
           target={annotationState.maeData.target}
           windowId={windowId}
+        />
+      </Grid>
+      <Grid item>
+        <TextFormSection
+          annoHtml={annotationState.body.value}
+          updateAnnotationBody={updateAnnotationTextualBodyValue}
         />
       </Grid>
       <Grid item>
         <AnnotationFormFooter
           closeFormCompanionWindow={closeFormCompanionWindow}
           saveAnnotation={saveFunction}
-          t={t}
           annotationState={annotationState}
         />
       </Grid>
@@ -123,7 +119,6 @@ TextCommentTemplate.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   playerReferences: PropTypes.object.isRequired,
   saveAnnotation: PropTypes.func.isRequired,
-  t: PropTypes.func.isRequired,
   windowId: PropTypes.string.isRequired,
 };
 

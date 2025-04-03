@@ -3,6 +3,7 @@ import {
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import WhoAndWhenFormSection, { SECTION_MODE } from './WhoAndWhenFormSection';
 
 /** Annotation form footer, save or cancel the edition/creation of an annotation */
@@ -10,12 +11,12 @@ function AnnotationFormFooter({
   annotationState,
   closeFormCompanionWindow,
   saveAnnotation,
-  t,
 }) {
+  const { t } = useTranslation();
+
   /**
    * Validate form and save annotation
    */
-
   return (
     <>
       {
@@ -27,7 +28,6 @@ function AnnotationFormFooter({
               creator={annotationState.creator}
               creationDate={annotationState.creationDate}
               displayMode={SECTION_MODE}
-              t={t}
             />
           </Grid>
         )
@@ -63,7 +63,6 @@ AnnotationFormFooter.propTypes = {
   annotationState: PropTypes.object.isRequired,
   closeFormCompanionWindow: PropTypes.func.isRequired,
   saveAnnotation: PropTypes.func.isRequired,
-  t: PropTypes.func.isRequired,
 };
 
 export default AnnotationFormFooter;

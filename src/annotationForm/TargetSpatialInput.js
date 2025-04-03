@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@mui/material/Typography';
 import { Grid } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import AnnotationDrawing from './AnnotationFormOverlay/AnnotationDrawing';
 import { getTargetSVGToolState, TARGET_VIEW } from './AnnotationFormUtils';
 import AnnotationFormOverlay from './AnnotationFormOverlay/AnnotationFormOverlay';
@@ -11,10 +12,10 @@ import { KONVA_MODE } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
 export function TargetSpatialInput({
   playerReferences,
   setTargetDrawingState,
-  t,
   targetDrawingState,
   windowId,
 }) {
+  const { t } = useTranslation();
   // TODO the targetSVGToolSTate is not used. Why the defaultToolState is used?
   const [toolState, setToolState] = useState(getTargetSVGToolState());
   const [viewTool, setViewTool] = useState(TARGET_VIEW);
@@ -115,7 +116,6 @@ export function TargetSpatialInput({
               shapes={drawingState.shapes}
               currentShape={drawingState.currentShape}
               setViewTool={setViewTool}
-              t={t}
               displayMode={KONVA_MODE.TARGET}
               updateCurrentShapeInShapes={updateCurrentShapeInShapes}
             />
@@ -130,7 +130,6 @@ TargetSpatialInput.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   playerReferences: PropTypes.object.isRequired,
   setTargetDrawingState: PropTypes.func.isRequired,
-  t: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   targetDrawingState: PropTypes.object.isRequired,
   windowId: PropTypes.string.isRequired,

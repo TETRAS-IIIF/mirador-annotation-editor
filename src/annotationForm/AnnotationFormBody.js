@@ -41,7 +41,6 @@ export default function AnnotationFormBody(
                 closeFormCompanionWindow={closeFormCompanionWindow}
                 playerReferences={playerReferences}
                 saveAnnotation={saveAnnotation}
-                t={t}
                 windowId={windowId}
               />
             )

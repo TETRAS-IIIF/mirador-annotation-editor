@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import Typography from '@mui/material/Typography';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ANONYMOUS_USER } from '../annotationAdapter/LocalStorageAdapter';
 
 export const TOOLTIP_MODE = 'tooltip';
@@ -23,8 +24,9 @@ function WhoAndWhenFormSection({
   lastEditor,
   lastSavedDate,
   displayMode,
-  t,
 }) {
+  const { t } = useTranslation();
+
   if (!creator || !creationDate) {
     return null;
   }
@@ -74,7 +76,6 @@ WhoAndWhenFormSection.propTypes = {
   displayMode: PropTypes.string.isRequired,
   lastEditor: PropTypes.string.isRequired,
   lastSavedDate: PropTypes.string.isRequired,
-  t: PropTypes.func.isRequired,
 };
 
 export default WhoAndWhenFormSection;

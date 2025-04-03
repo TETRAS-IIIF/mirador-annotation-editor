@@ -1,6 +1,7 @@
 import React from 'react';
 import { Grid, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import TextEditor from '../TextEditor';
 
 /**
@@ -14,9 +15,9 @@ export default function TextFormSection(
   {
     annoHtml,
     updateAnnotationBody,
-    t,
   },
 ) {
+  const { t } = useTranslation();
   return (
     <Grid container direction="column" spacing={1}>
       <Grid container item>
@@ -36,6 +37,5 @@ export default function TextFormSection(
 
 TextFormSection.propTypes = {
   annoHtml: PropTypes.string.isRequired,
-  t: PropTypes.func.isRequired,
   updateAnnotationBody: PropTypes.func.isRequired,
 };

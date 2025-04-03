@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { MEDIA_TYPES } from './AnnotationFormUtils';
 import { TargetSpatialInput } from './TargetSpatialInput';
 
@@ -8,7 +9,6 @@ import { TargetSpatialInput } from './TargetSpatialInput';
  *
  * @param onChangeTarget
  * @param spatialTarget
- * @param t
  * @param playerReferences
  * @param target
  * @param windowId
@@ -19,12 +19,12 @@ export default function TargetFormSection(
   {
     onChangeTarget,
     spatialTarget,
-    t,
     playerReferences,
     target,
     windowId,
   },
 ) {
+  const { t } = useTranslation();
   if (!target) {
     // eslint-disable-next-line no-param-reassign
     target = {};
@@ -75,7 +75,6 @@ export default function TargetFormSection(
               setTargetDrawingState={onChangeTargetInput}
               targetDrawingState={target.drawingState}
               windowId={windowId}
-              t={t}
             />
           </Grid>
         )
@@ -89,7 +88,6 @@ TargetFormSection.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   playerReferences: PropTypes.object.isRequired,
   spatialTarget: PropTypes.bool.isRequired,
-  t: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   target: PropTypes.object.isRequired,
   windowId: PropTypes.string.isRequired,

@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 import CategoryIcon from '@mui/icons-material/Category';
+import { useTranslation } from 'react-i18next';
 import CursorIcon from '../../icons/Cursor';
 import AnnotationFormOverlayTool from './AnnotationFormOverlayTool';
 import {
@@ -33,9 +34,9 @@ function AnnotationFormOverlay(
     updateCurrentShapeInShapes,
     setViewTool,
     shapes,
-    t,
   },
 ) {
+  const { t } = useTranslation();
   useEffect(() => {
 
   }, [toolState.fillColor, toolState.strokeColor, toolState.strokeWidth]);
@@ -172,7 +173,6 @@ AnnotationFormOverlay.propTypes = {
       y: PropTypes.number,
     }),
   ).isRequired,
-  t: PropTypes.func.isRequired,
   toolState: PropTypes.shape({
     activeTool: PropTypes.string.isRequired,
     closedMode: PropTypes.bool.isRequired,
