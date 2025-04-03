@@ -20,6 +20,7 @@ export default function TaggingTemplate(
   },
 ) {
   const { t } = useTranslation();
+  // initalize mae tagging annotation
   const maeAnnotation = initalizeMaeAnnotation(annotation, 'Image', 'tagging', TEMPLATE.TAGGING_TYPE);
 
   const [annotationState, setAnnotationState] = useState(maeAnnotation);
