@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 import { Grid } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import { useTranslation } from 'react-i18next';
 import { TEMPLATE } from './AnnotationFormUtils';
 import TextCommentTemplate from './TextCommentTemplate';
 import IIIFTemplate from './IIIFTemplate';
 import TaggingTemplate from './TaggingTemplate';
+import DebugInfo from './DebugInfo';
 
-import './debug.css';
 import { AdvancedAnnotationEditor } from './AdvancedAnnotationEditor';
 
 /**
@@ -27,7 +25,6 @@ export default function AnnotationFormBody(
     windowId,
   },
 ) {
-  const { t } = useTranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   return (
@@ -80,47 +77,7 @@ export default function AnnotationFormBody(
           />
         )}
       </Grid>
-      {debugMode && (
-        <>
-          <Typography>
-            {playerReferences.getMediaType()}
-          </Typography>
-          <Typography>
-            {t('scale')}
-            :
-            {playerReferences.getScale()}
-          </Typography>
-          <Typography>
-            {t('zoom')}
-            :
-            {playerReferences.getZoom()}
-          </Typography>
-          <Typography>
-            {t('image_true_size')}
-            :
-            {playerReferences.getMediaTrueWidth()}
-            {' '}
-            x
-            {playerReferences.getMediaTrueHeight()}
-          </Typography>
-          <Typography>
-            {t('container_size')}
-            :
-            {playerReferences.getContainerWidth()}
-            {' '}
-            x
-            {playerReferences.getContainerHeight()}
-          </Typography>
-          <Typography>
-            {t('image_displayed')}
-            :
-            {playerReferences.getDisplayedMediaWidth()}
-            {' '}
-            x
-            {playerReferences.getDisplayedMediaHeight()}
-          </Typography>
-        </>
-      )}
+      <DebugInfo debugMode={debugMode} playerReferences={playerReferences} />
     </Grid>
   );
 }
