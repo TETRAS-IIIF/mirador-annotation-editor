@@ -53,7 +53,6 @@ export default function AnnotationFormBody(
                 closeFormCompanionWindow={closeFormCompanionWindow}
                 playerReferences={playerReferences}
                 saveAnnotation={saveAnnotation}
-                t={t}
               />
             )
           }
@@ -63,7 +62,6 @@ export default function AnnotationFormBody(
               closeFormCompanionWindow={closeFormCompanionWindow}
               playerReferences={playerReferences}
               saveAnnotation={saveAnnotation}
-              t={t}
               windowId={windowId}
             />
           )}

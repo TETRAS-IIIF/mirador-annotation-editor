@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Grid, TextField } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import AnnotationFormFooter from './AnnotationFormFooter';
 import { TEMPLATE } from './AnnotationFormUtils';
 import TargetFormSection from './TargetFormSection';
@@ -14,10 +15,10 @@ export default function TaggingTemplate(
     closeFormCompanionWindow,
     playerReferences,
     saveAnnotation,
-    t,
     windowId,
   },
 ) {
+  const { t } = useTranslation();
   let maeAnnotation = annotation;
 
   if (!maeAnnotation.id) {
@@ -95,7 +96,6 @@ export default function TaggingTemplate(
           onChangeTarget={updateTargetState}
           playerReferences={playerReferences}
           spatialTarget
-          t={t}
           target={annotationState.maeData.target}
           windowId={windowId}
         />
@@ -104,7 +104,6 @@ export default function TaggingTemplate(
         <AnnotationFormFooter
           closeFormCompanionWindow={closeFormCompanionWindow}
           saveAnnotation={saveFunction}
-          t={t}
           annotationState={annotationState}
         />
       </Grid>
@@ -135,6 +134,5 @@ TaggingTemplate.propTypes = {
   playerReferences: PropTypes.object.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   saveAnnotation: PropTypes.func.isRequired,
-  t: PropTypes.func.isRequired,
   windowId: PropTypes.string.isRequired,
 };

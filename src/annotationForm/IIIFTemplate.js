@@ -17,7 +17,6 @@ export default function IIIFTemplate({
   saveAnnotation,
   closeFormCompanionWindow,
   canvases,
-  t,
 }) {
   const [annotationState, setAnnotationState] = useState(annotation);
 
@@ -51,7 +50,6 @@ export default function IIIFTemplate({
       <AnnotationFormFooter
         closeFormCompanionWindow={closeFormCompanionWindow}
         saveAnnotation={saveFunction}
-        t={t}
         annotationState={annotationState}
       />
     </>
@@ -78,5 +76,4 @@ IIIFTemplate.propTypes = {
   canvases: PropTypes.arrayOf(PropTypes.object).isRequired,
   closeFormCompanionWindow: PropTypes.func.isRequired,
   saveAnnotation: PropTypes.func.isRequired,
-  t: PropTypes.func.isRequired,
 };
