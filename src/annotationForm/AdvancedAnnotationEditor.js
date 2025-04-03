@@ -11,7 +11,6 @@ export function AdvancedAnnotationEditor({
   closeFormCompanionWindow,
   onChange,
   saveAnnotation,
-  t,
   value,
 }) {
   return (
@@ -28,7 +27,6 @@ export function AdvancedAnnotationEditor({
         <AnnotationFormFooter
           closeFormCompanionWindow={closeFormCompanionWindow}
           saveAnnotation={saveAnnotation}
-          t={t}
           annotationState={value}
         />
       </Grid>
@@ -60,5 +58,4 @@ AdvancedAnnotationEditor.propTypes = {
     manifestNetwork: PropTypes.string,
     target: PropTypes.string,
   }).isRequired,
-  t: PropTypes.func.isRequired,
 };

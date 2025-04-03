@@ -77,7 +77,6 @@ export default function AnnotationFormBody(
             }}
             closeFormCompanionWindow={closeFormCompanionWindow}
             saveAnnotation={saveAnnotation}
-            t={t}
           />
         )}
       </Grid>
