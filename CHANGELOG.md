@@ -9,6 +9,18 @@ Entries types:
 - `FIXED` for any bug fixes.
 - `SECURITY` to invite users to upgrade in case of vulnerabilities.
 
+## [ 1.1.3 ]
+
+- ADDED : Auto deploy 'stable' and 'latest' demo on github pages
+
+## [ 1.1.2 ]
+
+- FIXED : Fix regression from M4 update
+
+## [ 1.1.1 ]
+
+- FIXED : Fix regression from M4 update
+
 ## [ 1.1.0 ]
 
 - ADDED : Mirador 4 support, some minor regression can be feared
