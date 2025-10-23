@@ -8,7 +8,10 @@
     "dist"
   ],
   "exports": {
-    "./src": "./src/index.js"
+    "./src": "./src/index.js",
+    ".": {
+      "import": "./dist/mirador-annotation-editor.es.js"
+     }
   },
   "scripts": {
     "prepare": "npm run build",
