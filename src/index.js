@@ -11,7 +11,6 @@ export {
   windowSideBarButtonsPlugin,
 };
 
-
 // TODO atttention M4 merge
 
 const annotationPlugins = [

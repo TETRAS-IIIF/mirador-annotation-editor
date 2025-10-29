@@ -9,6 +9,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import flatten from 'lodash/flatten';
 import { Tooltip } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useTranslation, withTranslation } from 'react-i18next';
 import InfoIcon from '@mui/icons-material/Info';
 import AnnotationActionsContext from './AnnotationActionsContext';
@@ -16,6 +17,7 @@ import WhoAndWhenFormSection, { TOOLTIP_MODE } from './annotationForm/WhoAndWhen
 
 // TODO missing TRAD
 const CanvasListItem = forwardRef((props, ref) => {
+  const theme = useTheme();
   const [isHovering, setIsHovering] = useState(false);
   const context = useContext(AnnotationActionsContext);
 
@@ -41,14 +43,15 @@ const CanvasListItem = forwardRef((props, ref) => {
       return (annotation);
     });
     return annotation;
-  }, [props.annotationid]);
+    // include context deps to avoid stale reads when style-only changes are present
+  }, [props.annotationid, context.canvases, context.annotationsOnCanvases]);
 
   /**
-   * Handle deletion of annotation.
-   * @function
-   * @name handleDelete
-   * @returns {void}
-   */
+     * Handle deletion of annotation.
+     * @function
+     * @name handleDelete
+     * @returns {void}
+     */
   const handleDelete = () => {
     const {
       canvases,
@@ -64,11 +67,11 @@ const CanvasListItem = forwardRef((props, ref) => {
         });
     });
   };
-  /**
-   * Handles editing of an annotation.
-   * @function handleEdit
-   * @returns {void}
-   */
+    /**
+     * Handles editing of an annotation.
+     * @function handleEdit
+     * @returns {void}
+     */
   const handleEdit = () => {
     const {
       addCompanionWindow,
@@ -80,10 +83,10 @@ const CanvasListItem = forwardRef((props, ref) => {
       position: 'right',
     });
   };
-  /**
-   * Checks if a given annotation ID is editable.
-   * @returns {boolean} Returns true if the annotation ID is editable, false otherwise.
-   */
+    /**
+     * Checks if a given annotation ID is editable.
+     * @returns {boolean} Returns true if the annotation ID is editable, false otherwise.
+     */
   const editable = () => {
     const {
       annotationsOnCanvases,
@@ -92,6 +95,7 @@ const CanvasListItem = forwardRef((props, ref) => {
     const { annotationid } = props;
     const annoIds = canvases.map((canvas) => {
       if (annotationsOnCanvases[canvas.id]) {
+        // returns the id of all editable annotations for all canvases in `annotationsOnCanvas`
         return flatten(Object.entries(annotationsOnCanvases[canvas.id])
           .map(([key, value]) => {
             if (value.json && value.json.items) {
@@ -119,82 +123,86 @@ const CanvasListItem = forwardRef((props, ref) => {
       ref={ref}
     >
       {(isHovering && editable()) && (
-      <div>
-        <ToggleButtonGroup
-          aria-label="annotation tools"
-          size="small"
-          style={{
-            backgroundColor: 'white',
-            position: 'absolute',
-            right: 0,
-            zIndex: 10000,
-          }}
-        >
-          {context.config?.debug && (
-          <Tooltip title={t('debugAnnotation')}>
-            <span>
-              <ToggleButton
-                aria-label="Debug"
-                onClick={() => console.log(annotationData)}
-                value="debug"
-              >
-                <SettingsIcon />
-              </ToggleButton>
-            </span>
-          </Tooltip>
-          )}
-
-          {!!annotationData?.creator && (
-          <Tooltip
-            title={(
-              <WhoAndWhenFormSection
-                creator={annotationData.creator}
-                creationDate={annotationData.creationDate}
-                lastEditor={annotationData.lastEditor}
-                lastSavedDate={annotationData.lastSavedDate}
-                displayMode={TOOLTIP_MODE}
-                t={t}
-              />
-)}
+        <div>
+          <ToggleButtonGroup
+            aria-label="annotation tools"
+            size="small"
+            sx={{
+              bgcolor: theme.palette.background.paper,
+              borderRadius: theme.shape.borderRadius,
+              boxShadow: theme.shadows[2],
+              position: 'absolute',
+              right: 0,
+              zIndex: theme.zIndex.modal + 1,
+            }}
           >
-            <span>
-              <ToggleButton aria-label="Metadata" value="metadata">
-                <InfoIcon />
-              </ToggleButton>
-            </span>
-          </Tooltip>
-          )}
-
-          {context.config?.annotation?.readonly !== true && [<Tooltip
-            title={t('edit_annotation')}
-            key="edit"
-          >
-            <span>
-              <ToggleButton
-                aria-label="Edit"
-                onClick={context.windowViewType === 'single' ? handleEdit : context.toggleSingleCanvasDialogOpen}
-                value="edit"
-                disabled={!context.annotationEditCompanionWindowIsOpened}
-              >
-                <EditIcon />
-              </ToggleButton>
-            </span>
-          </Tooltip>,
-
-            <Tooltip title={t('deleteAnnotation')} key="delete">
+            {context.config?.debug && (
+            <Tooltip title={t('debugAnnotation')}>
               <span>
                 <ToggleButton
-                  aria-label="Delete"
-                  onClick={handleDelete}
-                  value="delete"
-                  disabled={!context.annotationEditCompanionWindowIsOpened}
+                  aria-label="Debug"
+                  onClick={() => console.log(annotationData)}
+                  value="debug"
                 >
-                  <DeleteIcon />
+                  <SettingsIcon />
                 </ToggleButton>
               </span>
-            </Tooltip>]}
-        </ToggleButtonGroup>
-      </div>
+            </Tooltip>
+            )}
+
+            {!!annotationData?.creator && (
+            <Tooltip
+              title={(
+                <WhoAndWhenFormSection
+                  creator={annotationData.creator}
+                  creationDate={annotationData.creationDate}
+                  lastEditor={annotationData.lastEditor}
+                  lastSavedDate={annotationData.lastSavedDate}
+                  displayMode={TOOLTIP_MODE}
+                  t={t}
+                />
+                                )}
+            >
+              <span>
+                <ToggleButton aria-label="Metadata" value="metadata">
+                  <InfoIcon />
+                </ToggleButton>
+              </span>
+            </Tooltip>
+            )}
+
+            {context.config?.annotation?.readonly !== true && [
+              <Tooltip
+                title={t('edit_annotation')}
+                key="edit"
+              >
+                <span>
+                  <ToggleButton
+                    aria-label="Edit"
+                    onClick={context.windowViewType === 'single' ? handleEdit : context.toggleSingleCanvasDialogOpen}
+                    value="edit"
+                    disabled={!context.annotationEditCompanionWindowIsOpened}
+                  >
+                    <EditIcon />
+                  </ToggleButton>
+                </span>
+              </Tooltip>,
+
+              <Tooltip title={t('deleteAnnotation')} key="delete">
+                <span>
+                  <ToggleButton
+                    aria-label="Delete"
+                    onClick={handleDelete}
+                    value="delete"
+                    disabled={!context.annotationEditCompanionWindowIsOpened}
+                  >
+                    <DeleteIcon />
+                  </ToggleButton>
+                </span>
+              </Tooltip>,
+            ]}
+          </ToggleButtonGroup>
+        </div>
 
       )}
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}

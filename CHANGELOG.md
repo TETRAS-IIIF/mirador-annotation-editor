@@ -9,6 +9,13 @@ Entries types:
 - `FIXED` for any bug fixes.
 - `SECURITY` to invite users to upgrade in case of vulnerabilities.
 
+## [ 1.1.4 ]
+
+- ADDED : Aiiinotate adapter
+- FIXED : Npm package publish issues since moving to vite
+- FIXED : Translation issue 
+- FIXED : Error when no Quill config is provided
+
 ## [ 1.1.3 ]
 
 - ADDED : Auto deploy 'stable' and 'latest' demo on github pages

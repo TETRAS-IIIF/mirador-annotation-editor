@@ -13,28 +13,24 @@ import { styled } from '@mui/system';
 import { useTranslation } from 'react-i18next';
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
-  '&:focus': {
-    backgroundColor: theme.palette.action.focus,
-  },
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-  },
+  '&:focus': { backgroundColor: theme.palette.action.focus },
+  '&:hover': { backgroundColor: theme.palette.action.hover }
 }));
 
 /**
- *
+ * AnnotationExportDialog
  * @param canvases
  * @param config
  * @param handleClose
  * @param open
- * @returns {JSX.Element}
- * @constructor AnnotationExportDialog
+ * @returns {Element}
+ * @constructor
  */
 function AnnotationExportDialog({
   canvases,
   config,
   handleClose,
-  open,
+  open
 }) {
   const [exportLinks, setExportLinks] = useState([]);
   const { t } = useTranslation();
@@ -43,12 +39,11 @@ function AnnotationExportDialog({
     if (!open) return;
 
     /**
-     * Fetch export links for annotations
-     * @returns {Promise<void>}
+     * Fetch export links
      */
     const fetchExportLinks = async () => {
       /**
-       * Reducer function to fetch annotations for each canvas
+       * Reducer to get all annotations for each canvas
        * @param acc
        * @param canvas
        * @returns {Promise<[...*,{canvasId, id: *, label: *, url: string}]|*>}
@@ -57,22 +52,25 @@ function AnnotationExportDialog({
         const store = config.annotation.adapter(canvas.id);
         const resolvedAcc = await acc;
         const content = await store.all();
-        if (content) {
-          // eslint-disable-next-line no-underscore-dangle
-          const label = (canvas.__jsonld && canvas.__jsonld.label) || canvas.id;
-          const data = new Blob([JSON.stringify(content)], { type: 'application/json' });
-          const url = window.URL.createObjectURL(data);
-          return [...resolvedAcc, {
+        if (!content) return resolvedAcc;
+
+        // eslint-disable-next-line no-underscore-dangle
+        const label = (canvas.__jsonld && canvas.__jsonld.label) || canvas.id;
+        const data = new Blob([JSON.stringify(content)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(data);
+
+        return [
+          ...resolvedAcc,
+          {
             canvasId: canvas.id,
             id: content.id || content['@id'],
             label,
-            url,
-          }];
-        }
-        return resolvedAcc;
+            url
+          }
+        ];
       };
 
-      if (canvases && canvases.length > 0) {
+      if (canvases?.length > 0) {
         const links = await canvases.reduce(reducer, []);
         setExportLinks(links);
       }
@@ -82,10 +80,29 @@ function AnnotationExportDialog({
   }, [canvases, config, open]);
 
   /**
-   * Close dialog window
+   * Close dialog
    */
   const closeDialog = () => {
+    exportLinks.forEach((l) => {
+      try {
+        URL.revokeObjectURL(l.url);
+      } catch { /* empty */
+      }
+    });
     setExportLinks([]);
+    handleClose();
+  };
+
+  /**
+   * Handle dialog close
+   * @param event
+   * @param reason
+   */
+  const handleDialogClose = (event, reason) => {
+    if (reason === 'escapeKeyDown' || reason === 'backdropClick') {
+      closeDialog();
+      return;
+    }
     handleClose();
   };
 
@@ -93,13 +110,15 @@ function AnnotationExportDialog({
     <Dialog
       aria-labelledby="annotation-export-dialog-title"
       id="annotation-export-dialog"
-      onClose={handleClose}
-      onEscapeKeyDown={closeDialog}
+      onClose={handleDialogClose}
       open={open}
     >
-      <DialogTitle id="annotation-export-dialog-title" disableTypography>
-        <Typography variant="h2">{t('export_annotation')}</Typography>
+      <DialogTitle id="annotation-export-dialog-title">
+        <Typography variant="h2" component="span">
+          {t('export_annotation')}
+        </Typography>
       </DialogTitle>
+
       <DialogContent>
         {exportLinks.length === 0 ? (
           <Typography variant="body1">{t('no_annotation')}</Typography>
@@ -107,19 +126,16 @@ function AnnotationExportDialog({
           <MenuList>
             {exportLinks.map((dl) => (
               <StyledMenuItem
-                button
                 component="a"
                 key={dl.canvasId}
-                aria-label={t('export_annotation_for')}
+                aria-label={t('export_annotation_for', { label: dl.canvasId })}
                 href={dl.url}
                 download={`${dl.id}.json`}
               >
                 <ListItemIcon>
                   <GetAppIcon />
                 </ListItemIcon>
-                <ListItemText>
-                  {t('export_annotation_for')}
-                </ListItemText>
+                <ListItemText>{t('export_annotation_for', { label: dl.canvasId })}</ListItemText>
               </StyledMenuItem>
             ))}
           </MenuList>
@@ -130,16 +146,14 @@ function AnnotationExportDialog({
 }
 
 AnnotationExportDialog.propTypes = {
-  canvases: PropTypes.arrayOf(
-    PropTypes.shape({ id: PropTypes.string }),
-  ).isRequired,
+  canvases: PropTypes.arrayOf(PropTypes.shape({ id: PropTypes.string })).isRequired,
   config: PropTypes.shape({
     annotation: PropTypes.shape({
-      adapter: PropTypes.func,
-    }),
+      adapter: PropTypes.func
+    })
   }).isRequired,
   handleClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
+  open: PropTypes.bool.isRequired
 };
 
 export default AnnotationExportDialog;

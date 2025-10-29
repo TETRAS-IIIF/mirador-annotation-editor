@@ -1,26 +1,20 @@
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 
 import CanvasListItem from '../src/CanvasListItem';
 import AnnotationActionsContext from '../src/AnnotationActionsContext';
 import { fireEvent, render, screen } from './test-utils';
 
 const receiveAnnotation = vi.fn();
-const storageAdapter = vi.fn(() => (
-  {
-    all: vi.fn()
-      .mockResolvedValue(
-        {
-          items: [
-            { id: 'anno/2' },
-          ],
-        },
-      ),
-    annotationPageId: 'pageId/3',
-    delete: vi.fn(async () => 'annoPageResultFromDelete'),
-  }
-));
+const storageAdapter = vi.fn(() => ({
+  all: vi.fn()
+    .mockResolvedValue({
+      items: [{ id: 'anno/2' }]
+    }),
+  annotationPageId: 'pageId/3',
+  delete: vi.fn(async () => 'annoPageResultFromDelete')
+}));
 
-/** */
 function createWrapper(props, context = {}) {
   return render(
     <AnnotationActionsContext.Provider
@@ -29,19 +23,14 @@ function createWrapper(props, context = {}) {
         receiveAnnotation,
         storageAdapter,
         switchToSingleCanvasView: () => undefined,
-        ...context,
+        ...context
       }}
     >
-      <CanvasListItem
-        annotationid="anno/1"
-        {...props}
-      >
+      <CanvasListItem annotationid="anno/1" {...props}>
         <div>HelloWorld</div>
       </CanvasListItem>
     </AnnotationActionsContext.Provider>,
-    {
-      context,
-    },
+    { context }
   );
 }
 
@@ -52,47 +41,37 @@ describe('CanvasListItem', () => {
       .toBeInTheDocument();
   });
 
-  it('Dont show edit or delete button when annotation are not editable on hovering', () => {
+  it('doesn\'t show edit/delete when annotation not editable on hover', async () => {
     createWrapper({}, {
       annotationsOnCanvases: {
         'canv/1': {
           'annoPage/1': {
-            json: {
-              items: [
-                {
-                  id: 'anno/1',
-                },
-              ],
-            },
-          },
-        },
+            json: { items: [{ id: 'anno/1' }] } // no maeData => not editable
+          }
+        }
       },
-      canvases: [
-        {
-          id: 'canv/1',
-        },
-      ],
+      canvases: [{ id: 'canv/1' }]
     });
-    const annotationElement = screen.getAllByRole('listitem')
-      .find(
-        (el) => el.getAttribute('annotationid') === 'anno/1',
-      );
-    fireEvent.mouseEnter(annotationElement);
 
-    // Check if element is not in the document
+    const li = screen.getByText('HelloWorld')
+      .closest('li');
+    expect(li)
+      .not
+      .toBeNull();
 
-    try {
-      const buttons = screen.getAllByRole('button');
-      expect(true)
-        .toBe(false);
-    } catch (e) {
-      expect(e)
-        .toBeInstanceOf(Error);
-    }
+    // you can use either userEvent.hover or fireEvent.mouseEnter
+    await userEvent.hover(li);
+    // fireEvent.mouseEnter(li!);
+
+    expect(screen.queryByRole('button', { name: /metadata/i }))
+      .toBeNull();
+    expect(screen.queryByRole('button', { name: /edit/i }))
+      .toBeNull();
+    expect(screen.queryByRole('button', { name: /delete/i }))
+      .toBeNull();
   });
 
-
-  it('shows an edit and delete button when it matches an editable annotationid and is hovering', () => {
+  it('shows edit/delete when editable and hovering', async () => {
     createWrapper({}, {
       annotationsOnCanvases: {
         'canv/1': {
@@ -101,35 +80,38 @@ describe('CanvasListItem', () => {
               items: [
                 {
                   id: 'anno/1',
-                  maeData: {
-                    someData: 'someValue',
-                  },
-                },
-              ],
-            },
-          },
-        },
+                  maeData: { cre: 'someValue' },
+                  creator: 'someCreator'
+                } // editable
+              ]
+            }
+          }
+        }
       },
-      canvases: [
-        {
-          id: 'canv/1',
-        },
-      ],
+      canvases: [{ id: 'canv/1' }]
     });
-    const annotationElement = screen.getAllByRole('listitem').find(
-      (el) => el.getAttribute('annotationid') === 'anno/1',
-    );
 
-    fireEvent.mouseEnter(annotationElement);
+    const li = screen.getByText('HelloWorld')
+      .closest('li');
+    expect(li)
+      .not
+      .toBeNull();
+
+    await userEvent.hover(li);
+    // fireEvent.mouseEnter(li!);
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons.length).toBe(3);
-    expect(screen.getByRole('button', { name: /metadata/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+    expect(buttons.length)
+      .toBe(3);
+    expect(screen.getByRole('button', { name: /metadata/i }))
+      .toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /edit/i }))
+      .toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete/i }))
+      .toBeInTheDocument();
   });
 
-  it('deletes from a storageAdapter when handling deletes', async () => {
+  it('deletes via storageAdapter on delete click', async () => {
     createWrapper({}, {
       annotationEditCompanionWindowIsOpened: true,
       annotationsOnCanvases: {
@@ -139,37 +121,32 @@ describe('CanvasListItem', () => {
               items: [
                 {
                   id: 'anno/1',
-                  maeData: {
-                    someData: 'someValue',
-                  },
-                },
-              ],
-            },
-          },
-        },
+                  maeData: { someData: 'someValue' }
+                }
+              ]
+            }
+          }
+        }
       },
-      canvases: [
-        {
-          id: 'canv/1',
-        },
-      ],
+      canvases: [{ id: 'canv/1' }]
     });
 
-    const annotationElement = screen.getAllByRole('listitem')
-      .find(
-        (el) => el.getAttribute('annotationid') === 'anno/1',
-      );
-    fireEvent.mouseEnter(annotationElement);
+    const li = screen.getByText('HelloWorld')
+      .closest('li');
+    expect(li)
+      .not
+      .toBeNull();
+
+    await userEvent.hover(li);
+    // fireEvent.mouseEnter(li!);
 
     const deleteButton = screen.getByRole('button', { name: /delete/i });
-
-    fireEvent.click(deleteButton);
+    await userEvent.click(deleteButton);
+    // fireEvent.click(deleteButton);
 
     expect(storageAdapter)
       .toHaveBeenCalledTimes(1);
     expect(storageAdapter)
-      .toHaveBeenCalledWith(
-        'canv/1',
-      );
+      .toHaveBeenCalledWith('canv/1');
   });
 });

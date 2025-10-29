@@ -178,7 +178,7 @@ function AnnotationFormOverlayToolOptions({
                   <TextField
                     value={toolState.text}
                     placeholder={t('text')}
-                    fullWidth
+                    fullwidth
                     onChange={handleTextChange}
                   />
                 </Grid>

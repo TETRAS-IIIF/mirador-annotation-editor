@@ -29,7 +29,7 @@ export const en = {
   ellipse: 'Ellipse',
   expert_mode: 'Expert mode',
   export_annotation: 'Export Annotations',
-  export_annotation_for: 'Export annotations for "${label}"',
+  export_annotation_for: 'Export annotation for {{label}}',
   export_local_annotation: 'Export local annotations for visible items',
   fill_color: 'Fill color',
   freehand: 'Freehand',

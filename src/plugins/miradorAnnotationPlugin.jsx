@@ -32,7 +32,6 @@ function MiradorAnnotation(
     annotationEditCompanionWindowIsOpened,
   },
 ) {
-
   const { t } = useTranslation();
 
   const [annotationExportDialogOpen, setAnnotationExportDialogOpen] = useState(false);
@@ -109,6 +108,7 @@ function MiradorAnnotation(
           open={singleCanvasDialogOpen}
           handleClose={toggleSingleCanvasDialogOpen}
           switchToSingleCanvasView={switchToSingleCanvasView}
+          t={t}
         />
       )}
       {offerExportDialog && (

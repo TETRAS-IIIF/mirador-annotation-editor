@@ -49,6 +49,7 @@ export default function MultipleBodyTemplate(
         maeAnnotation.maeData.target.drawingState,
       );
     }
+
     // We support only one textual body
     maeAnnotation.maeData.textBody = maeAnnotation.body.find((body) => body.purpose === 'describing');
     maeAnnotation.maeData.tags = maeAnnotation.body.filter((body) => body.purpose === 'tagging')

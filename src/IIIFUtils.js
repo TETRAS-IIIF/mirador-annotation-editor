@@ -216,3 +216,217 @@ const getIIIFTargetAsFragmentSVGSelector = (maeTarget, canvasId) => {
     source: canvasId,
   };
 };
+
+/**
+ * Create the body of a V2 annotation from a V3 annotation
+ * @param {object} v3body
+ * @returns {object}
+ */
+function createV2AnnoBody(v3body) {
+  const v2body = {
+    chars: v3body.value,
+  };
+  if (v3body.purpose === 'tagging') {
+    v2body['@type'] = 'oa:Tag';
+  } else {
+    v2body['@type'] = 'dctypes:Text';
+  }
+  if (v3body.format) {
+    v2body.format = v3body.format;
+  }
+  if (v3body.language) {
+    v2body.language = v3body.language;
+  }
+  if (v3body.purpose) {
+    v2body.motivation = v3body.purpose;
+  }
+  return v2body;
+}
+
+/**
+ * Create a V2 selector from a V3 selector
+ * @param {object} v3selector
+ * @returns {object|null}
+ */
+function createV2AnnoSelector(v3selector) {
+  switch (v3selector.type) {
+    case 'SvgSelector':
+      return {
+        '@type': 'oa:SvgSelector',
+        value: v3selector.value,
+      };
+    case 'FragmentSelector':
+      return {
+        '@type': 'oa:FragmentSelector',
+        value: v3selector.value,
+      };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Creates a V2 annotation from a V3 annotation
+ * @param {object} v3anno
+ * @returns {object}
+ */
+export function createV2Anno(v3anno) {
+  const v2anno = {
+    '@context': 'https://iiif.io/api/presentation/2/context.json',
+    '@type': 'oa:Annotation',
+    motivation: 'oa:commenting',
+    on: {
+      '@type': 'oa:SpecificResource',
+      full:
+        // `target` has a `source` with `id` object pointing to the proper canvas
+        v3anno.target.source?.id
+        // `target` has an id
+        || v3anno.target.id
+        // source is a string
+        || v3anno.target.source,
+    },
+    maeData: v3anno.maeData || {},
+  };
+  // copy id if it is SAS-generated
+  if (v3anno.id?.startsWith('http')) {
+    v2anno['@id'] = v3anno.id;
+  }
+  if (Array.isArray(v3anno.body)) {
+    v2anno.resource = v3anno.body.map((b) => createV2AnnoBody(b));
+  } else {
+    v2anno.resource = createV2AnnoBody(v3anno.body);
+  }
+  if (v3anno.target.selector) {
+    if (Array.isArray(v3anno.target.selector)) {
+      const selectors = v3anno.target.selector.map((s) => createV2AnnoSelector(s));
+      // create choice, assuming two elements and 0 is default
+      v2anno.on.selector = {
+        '@type': 'oa:Choice',
+        default: selectors[0],
+        item: selectors[1],
+      };
+    } else {
+      v2anno.on.selector = createV2AnnoSelector(v3anno.target.selector);
+    }
+    if (v3anno.target.source?.partOf) {
+      v2anno.on.within = {
+        '@id': v3anno.target.source.partOf.id,
+        '@type': 'sc:Manifest',
+      };
+    }
+  }
+  return v2anno;
+}
+
+/**
+ * create a V3 body from a V2 body
+ * @param {object} v2body
+ * @returns {object}
+ */
+function createV3AnnoBody(v2body) {
+  const v3body = {
+    type: 'TextualBody',
+    value: v2body.chars,
+  };
+  if (v2body.motivation) {
+    v3body.purpose = v2body.motivation;
+  }
+  if (v2body.format) {
+    v3body.format = v2body.format;
+  }
+  if (v2body.language) {
+    v3body.language = v2body.language;
+  }
+  if (v2body['@type'] === 'oa:Tag') {
+    v3body.purpose = 'tagging';
+  }
+  return v3body;
+}
+
+/**
+ * Create a V3 selector from a V2 selector
+ * @param {object} v2selector
+ * @returns {object}
+ */
+function createV3AnnoSelector(v2selector) {
+  switch (v2selector['@type']) {
+    case 'oa:SvgSelector':
+      return {
+        type: 'SvgSelector',
+        value: v2selector.value,
+      };
+    case 'oa:FragmentSelector':
+      return {
+        type: 'FragmentSelector',
+        value: v2selector.value,
+      };
+    case 'oa:Choice':
+      /* create alternate selectors */
+      return [
+        createV3AnnoSelector(v2selector.default),
+        createV3AnnoSelector(v2selector.item),
+      ];
+    default:
+      return null;
+  }
+}
+
+/**
+ * Creates a V3 annotation from a V2 annotation
+ * @param {object} v2anno
+ * @returns {object}
+ */
+function createV3Anno(v2anno) {
+  const v3anno = {
+    id: v2anno['@id'],
+    motivation: 'commenting',
+    type: 'Annotation',
+    maeData: v2anno.maeData || {}
+  };
+  if (Array.isArray(v2anno.resource)) {
+    v3anno.body = v2anno.resource.map((b) => createV3AnnoBody(b));
+  } else if (v2anno.resource) {
+    // it's an object
+    v3anno.body = createV3AnnoBody(v2anno.resource);
+  } else {
+    // no body is defined
+    v3anno.body = {};
+  }
+  let v2target = v2anno.on;
+  if (Array.isArray(v2target)) {
+    [v2target] = v2target;
+  }
+  v3anno.target = {
+    selector: createV3AnnoSelector(v2target.selector),
+    source: v2target.full,
+  };
+  if (v2target.within) {
+    v3anno.target.source = {
+      id: v2target.full,
+      partOf: {
+        id: v2target.within['@id'],
+        type: 'Manifest',
+      },
+      type: 'Canvas',
+    };
+  }
+  return v3anno;
+}
+
+/**
+ * from an array of IIIF V2 annotations, create a V3 annotationPage
+ * @param {object[]} v2annos - array of IIIF V2 annotations
+ * @param {string} annotationPageId - '@id' of the annotationPage
+ * @returns {object}
+ */
+export function createAnnotationPage(v2annos, annotationPageId) {
+  if (Array.isArray(v2annos)) {
+    const v3annos = v2annos.map((a) => createV3Anno(a));
+    return {
+      id: annotationPageId,
+      items: v3annos,
+      type: 'AnnotationPage',
+    };
+  }
+  return v2annos;
+}

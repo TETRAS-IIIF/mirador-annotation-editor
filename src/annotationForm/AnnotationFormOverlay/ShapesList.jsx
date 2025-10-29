@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import DeleteIcon from '@mui/icons-material/DeleteForever';
 import { styled } from '@mui/material/styles';
 import MenuList from '@mui/material/MenuList';
+import MenuItem from '@mui/material/MenuItem';
 
 /**
  * Accordion presentation of shapes
@@ -16,7 +17,7 @@ import MenuList from '@mui/material/MenuList';
  * @returns {Element}
  * @constructor
  */
-const ListItemContent = styled(ListItem)(({ theme }) => ({
+const Row = styled(ListItem)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
 }));
@@ -40,30 +41,29 @@ function ShapesList({
   return (
     <MenuList>
       {shapes.map((shape) => (
-        <div>
-          <ListItemContent sx={{ padding: 0 }}>
-            <div>
+        <React.Fragment key={shape.id}>
+          <MenuItem disableGutters>
+            <Row>
               <Typography
-                style={shape.id === currentShapeId ? { fontWeight: 'bold' } : {}}
-                onClick={() => updateCurrentShapeInShapes(shape)}
+                component="span"
                 sx={{
                   color: 'black',
                   cursor: 'pointer',
+                  fontWeight: shape.id === currentShapeId ? 'bold' : undefined,
                 }}
+                onClick={() => updateCurrentShapeInShapes(shape)}
               >
                 {t(shape.type)}
               </Typography>
-            </div>
-            <Tooltip title={t('delete')}>
-              <IconButton
-                onClick={() => deleteShape(shape.id)}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-          </ListItemContent>
-          <Divider />
-        </div>
+              <Tooltip title={t('delete')}>
+                <IconButton onClick={() => deleteShape(shape.id)} edge="end" aria-label="delete">
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            </Row>
+          </MenuItem>
+          <Divider component="li" />
+        </React.Fragment>
       ))}
     </MenuList>
   );
