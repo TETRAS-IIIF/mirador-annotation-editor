@@ -37,7 +37,7 @@ function Polygon({
   return (
     <>
       <Line
-        closed={false}
+        closed={shape.closed || false}
         draggable={activeTool === 'cursor' || activeTool === 'edit'}
         fill={shape.fill}
         globalCompositeOperation="source-over"

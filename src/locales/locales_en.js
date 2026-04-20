@@ -59,6 +59,7 @@ export const en = {
   polygon: 'Polygon',
   pressEnterToAddTag: 'Add your tag and press "Enter"',
   pressEscapeToFinish: 'Press "Esc" to finish the line',
+  pressEnterOrClickFirstPointToClose: 'Click first point or press "Enter" to close polygon, "Esc" to leave open',
   rectangle: 'Rectangle',
   save: 'Save',
   scale: 'Scale',

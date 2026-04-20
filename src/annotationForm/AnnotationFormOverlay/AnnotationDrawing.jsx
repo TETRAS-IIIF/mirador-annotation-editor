@@ -93,7 +93,7 @@ export default function AnnotationDrawing(
       return;
     }
 
-    // release the drawing
+      // release the drawing
     if (e.key === 'Escape') {
       if (toolState.activeTool === OVERLAY_TOOL.IMAGE) {
         return;
@@ -111,6 +111,22 @@ export default function AnnotationDrawing(
         currentShape: null,
         isDrawing: false,
       });
+      return;
+    }
+
+    // Close polygon on Enter key
+    if (e.key === 'Enter') {
+      if (toolState.activeTool === SHAPES_TOOL.POLYGON && drawingState.isDrawing) {
+        drawingState.currentShape.points.splice(-2, 2);
+        const closedShape = { ...drawingState.currentShape, closed: true };
+        updateCurrentShapeInShapes(closedShape);
+        setDrawingState({
+          ...drawingState,
+          currentShape: closedShape,
+          isDrawing: false,
+        });
+        setIsDrawing(false);
+      }
       return;
     }
 
@@ -408,6 +424,26 @@ export default function AnnotationDrawing(
           break;
         case SHAPES_TOOL.POLYGON:
           if (drawingState.isDrawing) {
+            // Check if clicking near the first point to close the polygon
+            const firstX = drawingState.currentShape.points[0];
+            const firstY = drawingState.currentShape.points[1];
+            const closeThreshold = 15 / scale;
+            const distToFirst = Math.sqrt(
+              (pos.x - firstX) ** 2 + (pos.y - firstY) ** 2,
+            );
+            if (distToFirst <= closeThreshold && drawingState.currentShape.points.length > 6) {
+              // Close the polygon
+              const closedShape = { ...drawingState.currentShape, closed: true };
+              closedShape.points.splice(-2, 2);
+              updateCurrentShapeInShapes(closedShape);
+              setDrawingState({
+                ...drawingState,
+                currentShape: closedShape,
+                isDrawing: false,
+              });
+              setIsDrawing(false);
+              break;
+            }
             drawingState.currentShape.points.splice(-2, 2, pos.x, pos.y);
             drawingState.currentShape.points.push(pos.x, pos.y);
             updateCurrentShapeInShapes({

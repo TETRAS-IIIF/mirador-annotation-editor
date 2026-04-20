@@ -222,7 +222,7 @@ function AnnotationFormOverlayToolOptions({
       {
         toolState.activeTool === SHAPES_TOOL.POLYGON && (
           <Typography>
-            {t('pressEscapeToFinish')}
+            {t('pressEnterOrClickFirstPointToClose')}
           </Typography>
         )
       }
