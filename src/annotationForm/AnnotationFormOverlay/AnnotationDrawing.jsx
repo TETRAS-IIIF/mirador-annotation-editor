@@ -77,7 +77,7 @@ export default function AnnotationDrawing(
       return;
     }
 
-    if (e.key === 'Delete') {
+    if (e.key === 'Delete' || e.key === 'Backspace') {
       // eslint-disable-next-line max-len
       const shapesWithoutTheDeleted = drawingState.shapes.filter((shape) => shape.id !== drawingState.currentShape.id);
       setDrawingState({
@@ -114,7 +114,7 @@ export default function AnnotationDrawing(
       return;
     }
 
-    // Close polygon on Enter key
+    // Close polygon on key
     if (e.key === 'Shift') {
       if (toolState.activeTool === SHAPES_TOOL.POLYGON && drawingState.isDrawing) {
         drawingState.currentShape.points.splice(-2, 2);
@@ -194,7 +194,6 @@ export default function AnnotationDrawing(
   const onShapeClick = async (shp) => {
     // return if we are not in edit or cursor mode
     if (toolState.activeTool !== 'edit' && toolState.activeTool !== 'cursor' && toolState.activeTool !== 'delete') {
-      console.log('En dehors d\'une shape click');
       return;
     }
     const shape = drawingState.shapes.find((s) => s.id === shp.id);
@@ -231,10 +230,7 @@ export default function AnnotationDrawing(
    * @param {Object} evt - The event object containing the target shape's modified attributes.
    */
   const onTransform = (evt) => {
-    console.log('onTransform');
-
     const modifiedShape = evt.target.attrs;
-
     const shape = drawingState.shapes.find((s) => s.id === modifiedShape.id);
 
     Object.assign(shape, modifiedShape);
@@ -605,21 +601,12 @@ export default function AnnotationDrawing(
 
   /** Stop drawing */
   const handleMouseUp = (e) => {
-    // TODO Remove after rewiew
-
-    console.debug('handleMouseUp');
-    console.debug(drawingState);
-    console.debug(toolState);
-
-
-
     if (drawingState.currentShape && !isResizing) {
       const stage = e.target.getStage();
       const clickedOnEmpty = e.target === stage;
       // I click on stage, not on a shape
       if (clickedOnEmpty) {
         const currentShapeType = drawingState.currentShape.type;
-        console.log('currentShapeType', currentShapeType);
         setToolState((prev) => ({
           ...prev,
           activeTool: currentShapeType,
