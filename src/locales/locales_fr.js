@@ -57,7 +57,7 @@ export const fr = {
   onlyOneImageAllowed: 'Une seule image par annotation',
   overlay: 'Dessin',
   polygon: 'Polygone',
-  pressEnterOrClickFirstPointToClose: 'Cliquez sur le premier point ou appuyez sur "Entrée" pour fermer le polygone, "Échap" pour laisser ouvert',
+  pressEnterOrClickFirstPointToClose: 'Cliquez sur le premier point ou appuyez sur "Maj" pour fermer le polygone, "Tab" pour laisser ouvert',
   pressEnterToAddTag: 'Valider avec "Entrée"',
   pressEscapeToFinish: 'Appuyez sur "Échap" pour terminer la ligne',
   rectangle: 'Rectangle',

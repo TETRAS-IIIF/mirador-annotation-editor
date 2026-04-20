@@ -94,7 +94,7 @@ export default function AnnotationDrawing(
     }
 
       // release the drawing
-    if (e.key === 'Escape') {
+    if (e.key === 'Tab') {
       if (toolState.activeTool === OVERLAY_TOOL.IMAGE) {
         return;
       }
@@ -115,7 +115,7 @@ export default function AnnotationDrawing(
     }
 
     // Close polygon on Enter key
-    if (e.key === 'Enter') {
+    if (e.key === 'Shift') {
       if (toolState.activeTool === SHAPES_TOOL.POLYGON && drawingState.isDrawing) {
         drawingState.currentShape.points.splice(-2, 2);
         const closedShape = { ...drawingState.currentShape, closed: true };
