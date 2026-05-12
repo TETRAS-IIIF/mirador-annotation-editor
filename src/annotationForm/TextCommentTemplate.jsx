@@ -24,7 +24,6 @@ function TextCommentTemplate(
   },
 ) {
   let maeAnnotation = annotation;
-
   if (!maeAnnotation.id) {
     // If the annotation does not have maeData, the annotation was not created with mae
     maeAnnotation = {

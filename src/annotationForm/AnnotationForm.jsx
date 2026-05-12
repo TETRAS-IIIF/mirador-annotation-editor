@@ -36,7 +36,7 @@ function AnnotationForm(
   // eslint-disable-next-line no-underscore-dangle
   const [mediaType, setMediaType] = useState(playerReferences.getMediaType());
 
-  // TODO perhaps useless
+  // TDOO perhaps useless
   const [retryCount, setRetryCount] = useState(0);
 
   const [, forceUpdate] = useReducer((x) => x + 1, 0);

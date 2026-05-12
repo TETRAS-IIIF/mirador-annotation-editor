@@ -28,7 +28,6 @@ export default function AnnotationFormBody(
   },
 ) {
   const { t } = useTranslation();
-
   const debugMode = useSelector((state) => getConfig(state)).annotation.debug ?? false;
   return (
     <Grid container direction="column">

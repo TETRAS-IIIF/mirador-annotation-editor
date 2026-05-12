@@ -6,6 +6,8 @@ export const en = {
   add_an_arrow_shape: 'Add an arrow shape',
   add_an_ellipse: 'Add an ellipse',
   add_image_from_url: 'Add image from URL',
+  ai: 'AI',
+  ai_comment: 'IA assist commenting',
   anonymous: 'Anonymous',
   arrow: 'Arrow',
   border_color: 'Border color',

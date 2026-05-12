@@ -27,6 +27,9 @@ const config = {
   catalog: manifestsCatalog,
   id: 'demo',
   language: 'en',
+  llm: {
+    endpoint: 'http://localhost:8000/',
+  },
   themes: {
     dark: {
       typography: {
@@ -70,7 +73,7 @@ const config = {
     sideBarOpenByDefault: true,
   },
   windows: [
-    { manifestId: 'https://iiif.harvardartmuseums.org/manifests/object/299843' }
+    { manifestId: 'https://collections.library.yale.edu/manifests/2025329' }
   ]
 };
 

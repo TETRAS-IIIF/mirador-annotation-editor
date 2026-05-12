@@ -8,6 +8,8 @@ import AiiinotateAdapter from './annotationAdapter/AiiinotateAdapter';
 import LocalStorageAdapter from './annotationAdapter/LocalStorageAdapter';
 import 'react-quill/dist/quill.snow.css';
 
+export { WindowPlayer } from './playerReferences';
+
 export {
   miradorAnnotationPlugin, externalStorageAnnotationPlugin,
   canvasAnnotationsPlugin, annotationCreationCompanionWindowPlugin,

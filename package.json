@@ -1,6 +1,6 @@
 {
-  "name": "mirador-annotation-editor",
-  "version": "1.3.0",
+  "name": "mirador-annotation-editor-ai-template",
+  "version": "0.0.1",
   "description": "Mirador annotation editor plugin in a React component. Mirador 4 compatible",
   "repository": {
     "type": "git",

@@ -21,6 +21,7 @@ export function TextCommentInput({
   setComment,
   t,
 }) {
+
   /**
    * Format the option label for the select component
    * @param option

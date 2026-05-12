@@ -10,6 +10,7 @@ import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtil
 import { MultiTagsInput } from './MultiTagsInput';
 import { getContextParams } from '../contextParams';
 import { TextCommentInput } from './TextCommentInput';
+import UtilsChipTools from './AI/Chip/UtilsChipTools';
 
 /** Tagging Template* */
 export default function MultipleBodyTemplate(
@@ -22,9 +23,12 @@ export default function MultipleBodyTemplate(
     windowId,
   },
 ) {
+  const windows = useSelector((state) => state.windows);
   const config = useSelector((state) => getConfig(state));
   const annotationConfig = config.annotation;
   const tagsSuggestions = annotationConfig.tagsSuggestions ?? [];
+  const manifestUrl = windows[windowId]?.manifestId;
+  const [isLoading, setIsLoading] = useState(false);
 
   let maeAnnotation = annotation;
 
@@ -83,37 +87,38 @@ export default function MultipleBodyTemplate(
    * Update the annotation's Body
    * */
   const updateAnnotationTextualBodyValue = (newTextValue) => {
-    setAnnotationState({
-      ...annotationState,
+    setAnnotationState((prevState) => ({
+      ...prevState,
       maeData: {
-        ...annotationState.maeData,
+        ...prevState.maeData,
         textBody: {
-          ...annotationState.maeData.textBody,
+          ...prevState.maeData.textBody,
           value: newTextValue,
         },
       },
-    });
+    }));
   };
 
   /** Update annotation with Tag Value * */
   const setTags = (newTags) => {
-    setAnnotationState({
-      ...annotationState,
+    setAnnotationState((prevState) => ({
+      ...prevState,
       maeData: {
-        ...annotationState.maeData,
+        ...prevState.maeData,
         tags: newTags,
       },
-    });
+    }));
   };
 
   /** Update Target State * */
   const updateTargetState = (target) => {
-    const newMaeData = annotationState.maeData;
-    newMaeData.target = target;
-    setAnnotationState({
-      ...annotationState,
-      maeData: newMaeData,
-    });
+    setAnnotationState((prevState) => ({
+      ...prevState,
+      maeData: {
+        ...prevState.maeData,
+        target,
+      },
+    }));
   };
 
   /** Save function * */
@@ -187,6 +192,18 @@ export default function MultipleBodyTemplate(
           timeTarget
           windowId={windowId}
         />
+      </Grid>
+      <Grid>
+        <UtilsChipTools
+          annotationState={annotationState}
+          manifestUrl={manifestUrl}
+          playerReferences={playerReferences}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          target={annotationState.maeData.target}
+          setAnnotationState={setAnnotationState}
+        />
+
       </Grid>
       <Grid>
         <AnnotationFormFooter
