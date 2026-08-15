@@ -9,6 +9,15 @@ Entries types:
 - `FIXED` for any bug fixes.
 - `SECURITY` to invite users to upgrade in case of vulnerabilities.
 
+## [1.3.2 ]
+
+- SECURITY : Update dependencies to fix vulnerabilities
+
+## [ 1.3.1 ]
+
+- SECURITY : Update dependencies to fix vulnerabilities
+- REMOVED : Draftsj deps removed from package.json
+
 ## [ 1.2.3 ]
 
 - CHANGED : UX improvement when drawing shape

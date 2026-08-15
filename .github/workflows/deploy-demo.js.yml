@@ -2,7 +2,7 @@ name: Stable + latest demo deploy
 
 on:
   push:
-    branches: [ main, demo ]
+    branches: [ main, demo, testing ]
   workflow_dispatch:
 
 permissions:
@@ -29,7 +29,7 @@ jobs:
           echo "REPO_SLUG=${{ github.repository }}" >> $GITHUB_ENV
           echo "REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
 
-      # --- checkout both branches ---
+      # --- checkout all branches ---
       - name: Checkout stable (demo)
         uses: actions/checkout@v4
         with:
@@ -41,6 +41,12 @@ jobs:
         with:
           ref: main
           path: main_src
+
+      - name: Checkout testing
+        uses: actions/checkout@v4
+        with:
+          ref: testing
+          path: testing_src
 
       # --- canvas deps (miss native system librabries)---
       - name: Install dependencies for canvas
@@ -63,6 +69,7 @@ jobs:
           cache-dependency-path: |
             demo_src/package-lock.json
             main_src/package-lock.json
+            testing_src/package-lock.json
 
       # -------- stable build --------
       - name: Install (stable)
@@ -85,6 +92,7 @@ jobs:
         run: |
           SHA=$(git rev-parse HEAD)
           DATE=$(git log -1 --date=iso-strict --format='%cd')
+          COMMIT_MSG=$(git log -1 --format='%s' | sed 's/"/\\"/g')
           PKG_NAME=$(node -p "require('./package.json').name || ''")
           VERSION=$(node -p "require('./package.json').version || ''")
           
@@ -99,6 +107,7 @@ jobs:
             "branch": "demo",
             "commit": "${SHA}",
             "commit_url": "https://github.com/${REPO_SLUG}/commit/${SHA}",
+            "commit_message": "${COMMIT_MSG}",
             "date": "${DATE}",
             "package_name": "${PKG_NAME}",
             "package_url": "${PKG_URL}",
@@ -129,6 +138,7 @@ jobs:
         run: |
           SHA=$(git rev-parse HEAD)
           DATE=$(git log -1 --date=iso-strict --format='%cd')
+          COMMIT_MSG=$(git log -1 --format='%s' | sed 's/"/\\"/g')
           PKG_NAME=$(node -p "require('./package.json').name || ''")
           VERSION=$(node -p "require('./package.json').version || ''")
           PKG_DESC=$(node -p "require('./package.json').description || ''" | sed 's/"/\\"/g')
@@ -144,6 +154,7 @@ jobs:
             "branch": "main",
             "commit": "${SHA}",
             "commit_url": "https://github.com/${REPO_SLUG}/commit/${SHA}",
+            "commit_message": "${COMMIT_MSG}",
             "date": "${DATE}",
             "package_name": "${PKG_NAME}",
             "package_url": "${PKG_URL}",
@@ -153,14 +164,62 @@ jobs:
             "package_description": "${PKG_DESC}"
           }
           JSON
+
+      # -------- testing build --------
+      - name: Install (testing)
+        working-directory: testing_src
+        run: npm ci
+
+      - name: Build (testing)
+        working-directory: testing_src
+        env:
+          GITHUB_PAGES: "true"
+          BASE_PATH: "/${{ env.REPO_NAME }}/testing/"
+        run: npm run build:demo
+
+      - name: Metadata (testing)
+        working-directory: testing_src
+        env:
+          REPO_SLUG: ${{ github.repository }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          SHA=$(git rev-parse HEAD)
+          DATE=$(git log -1 --date=iso-strict --format='%cd')
+          COMMIT_MSG=$(git log -1 --format='%s' | sed 's/"/\\"/g')
+          PKG_NAME=$(node -p "require('./package.json').name || ''")
+          VERSION=$(node -p "require('./package.json').version || ''")
+          PKG_DESC=$(node -p "require('./package.json').description || ''" | sed 's/"/\\"/g')
+          
+          [ -f dist/demo/src/index.html ] && mv dist/demo/src/index.html dist/index.html
+          cp dist/index.html dist/404.html
+          
+          PKG_URL="https://www.npmjs.com/package/${PKG_NAME}"
+          VERSION_URL="${PKG_URL}/v/${VERSION}"
+          
+          cat > dist/meta.json <<JSON
+          {
+            "branch": "testing",
+            "commit": "${SHA}",
+            "commit_url": "https://github.com/${REPO_SLUG}/commit/${SHA}",
+            "commit_message": "${COMMIT_MSG}",
+            "date": "${DATE}",
+            "package_name": "${PKG_NAME}",
+            "package_url": "${PKG_URL}",
+            "version": "${VERSION}",
+            "version_url": "${VERSION_URL}",
+            "base_path": "/${REPO_NAME}/testing/",
+            "package_description": "${PKG_DESC}"
+          }
+          JSON
           
           
           # -------- assemble site --------
       - name: Assemble site
         run: |
-          mkdir -p site/stable site/latest
+          mkdir -p site/stable site/latest site/testing
           cp -r demo_src/dist/* site/stable/
           cp -r main_src/dist/* site/latest/
+          cp -r testing_src/dist/* site/testing/
           cat > site/index.html <<'HTML'
           <!doctype html>
           <meta charset="utf-8">
@@ -185,14 +244,28 @@ jobs:
               <div id="stable-version" class="muted">Version: …</div>
               <div id="stable-date" class="muted">Last change: …</div>
               <div id="stable-sha" class="muted">Commit: …</div>
+              <div id="stable-msg" class="muted">Last commit: …</div>
+              <p> This demo is built from the <code>demo</code> branch, which is only updated for stable releases. It may not include the latest features or fixes, but should be the most reliable.</p>
             </div>
-            <div class="card">
+             <div class="card">
               <h2><a href="./latest/">Latest demo</a></h2>
               <div class="muted">Branch: <code>main</code></div>
               <div id="latest-version" class="muted">Version: …</div>
               <div id="latest-date" class="muted">Last change: …</div>
               <div id="latest-sha" class="muted">Commit: …</div>
+              <div id="latest-msg" class="muted">Last commit: …</div>
+              <p> This demo is built from the <code>main</code> branch, which is updated with every commit. It includes the latest features and fixes, but may be less stable.</p>
             </div>
+            <div class="card">
+              <h2><a href="./testing/">Testing demo</a></h2>
+              <div class="muted">Branch: <code>testing</code></div>
+              <div id="testing-version" class="muted">Version: …</div>
+              <div id="testing-date" class="muted">Last change: …</div>
+              <div id="testing-sha" class="muted">Commit: …</div>
+              <div id="testing-msg" class="muted">Last commit: …</div>
+              <p> This demo is built from the <code>testing</code> branch, which is updated with commits that are being tested before merging to main. It may include experimental features or fixes that are not yet fully validated.</p>
+            </div>
+         
           </div>
           <footer>
           <p>
@@ -211,6 +284,7 @@ jobs:
             const vEl=document.getElementById(id+'-version');
             const dEl=document.getElementById(id+'-date');
             const sEl=document.getElementById(id+'-sha');
+            const mEl=document.getElementById(id+'-msg');
             try{
               const r=await fetch(prefix+'/meta.json',{cache:'no-store'});
               if(!r.ok) throw 0;
@@ -239,13 +313,18 @@ jobs:
               // Commit short + link
               const short=(j.commit||'').slice(0,7);
               sEl.innerHTML='Commit: <a href="'+j.commit_url+'" target="_blank" rel="noopener noreferrer"><code>'+short+'</code></a>';
+
+              // Commit message
+              if(mEl) mEl.textContent='Last commit: '+(j.commit_message||'n/a');
             } catch {
               vEl.textContent='Version: unavailable';
               dEl.textContent='Last change: unavailable';
               sEl.textContent='Commit: unavailable';
+              if(mEl) mEl.textContent='Last commit: unavailable';
             }
           }
           loadMeta('./stable','stable');
+          loadMeta('./testing','testing');
           loadMeta('./latest','latest', true);
           </script>
           HTML

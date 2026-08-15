@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import uuid from 'draft-js/lib/uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Grid } from '@mui/material';
 import TextFormSection from './TextFormSection';
 import TargetFormSection from './TargetFormSection';
@@ -29,7 +29,7 @@ function TextCommentTemplate(
     // If the annotation does not have maeData, the annotation was not created with mae
     maeAnnotation = {
       body: {
-        id: uuid(),
+        id: uuidv4(),
         type: 'TextualBody',
         value: '',
       },
