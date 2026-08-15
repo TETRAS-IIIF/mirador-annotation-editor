@@ -21,9 +21,11 @@ const createViewer = ({
   topLeft = { x: 200.2, y: 80.4 },
   bottomRight = { x: 1143.6, y: 1233.1 },
 } = {}) => {
+  const viewportTopLeft = { x: 0, y: 0 };
+  const viewportBottomRight = { x: 1, y: 1 };
   const bounds = {
-    getBottomRight: vi.fn(() => ({ x: 1, y: 1 })),
-    getTopLeft: vi.fn(() => ({ x: 0, y: 0 })),
+    getBottomRight: vi.fn(() => viewportBottomRight),
+    getTopLeft: vi.fn(() => viewportTopLeft),
   };
 
   return {
@@ -32,7 +34,7 @@ const createViewer = ({
       getMaxZoom: vi.fn(() => 1),
       getZoom: vi.fn(() => 0.11),
       viewportToViewerElementCoordinates: vi.fn((point) => (
-        point.x === 1 && point.y === 1 ? bottomRight : topLeft
+        point === viewportTopLeft ? topLeft : bottomRight
       )),
     },
     world: {
