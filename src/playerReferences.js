@@ -5,6 +5,25 @@ import {
 } from 'mirador';
 import { MEDIA_TYPES } from './annotationForm/AnnotationFormUtils';
 
+/** ***********************
+ * Get media type of visible canvas
+ * @param state
+ * @param windowId
+ */
+export function checkMediaType(state, windowId) {
+  const audioResources = getVisibleCanvasAudioResources(state, { windowId }) || [];
+  const videoResources = getVisibleCanvasVideoResources(state, { windowId }) || [];
+
+  if (videoResources.length > 0) {
+    return MEDIA_TYPES.VIDEO;
+  }
+  if (audioResources.length > 0) {
+    return MEDIA_TYPES.AUDIO;
+  }
+
+  return MEDIA_TYPES.IMAGE;
+}
+
 /** */
 export class WindowPlayer {
   actions;
@@ -174,13 +193,8 @@ export class WindowPlayer {
    */
   getDisplayedMediaHeight() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const viewer = this.media.current;
-      if (viewer) {
-        const percentageHeight = this.getMediaTrueHeight() * viewer.viewport.getZoom();
-        const containerWidth = viewer.container.clientWidth;
-        const actualHeightInPixels = Math.round(containerWidth * percentageHeight);
-        return actualHeightInPixels;
-      }
+      const bounds = this.getImageBoundsInViewerPixels();
+      if (bounds) return Math.round(Math.abs(bounds.bottomRight.y - bounds.topLeft.y));
     }
     return undefined;
   }
@@ -191,13 +205,8 @@ export class WindowPlayer {
    */
   getDisplayedMediaWidth() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const viewer = this.media.current;
-      if (viewer && viewer.world.getItemCount() > 0) {
-        const percentageWidth = this.getMediaTrueWidth() * viewer.viewport.getZoom();
-        const containerWidth = viewer.container.clientWidth;
-        const actualWidthInPixels = Math.round(containerWidth * percentageWidth);
-        return actualWidthInPixels;
-      }
+      const bounds = this.getImageBoundsInViewerPixels();
+      if (bounds) return Math.round(Math.abs(bounds.bottomRight.x - bounds.topLeft.x));
     }
     return undefined;
   }
@@ -260,23 +269,44 @@ export class WindowPlayer {
    */
   getImagePosition() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const viewer = this.media.current;
-      if (viewer) {
-        // Assuming one image in OpenSeadragon for now
-        const tiledImage = viewer.world.getItemAt(0);
-        // Get the bounds of the image in viewport coordinates
-        const bounds = tiledImage.getBounds();
-        // Convert the top-left corner of the bounds to pixel coordinates
-        const topLeft = viewer.viewport.viewportToViewerElementCoordinates(bounds.getTopLeft());
-        // Round the coordinates for consistency
-        const position = {
-          x: Math.round(topLeft.x),
-          y: Math.round(topLeft.y),
+      const bounds = this.getImageBoundsInViewerPixels();
+      if (bounds) {
+        return {
+          x: Math.round(bounds.topLeft.x),
+          y: Math.round(bounds.topLeft.y),
         };
-        return position;
       }
     }
     return undefined;
+  }
+
+  /**
+   * Get image bounds converted to viewer-element pixels.
+   * @returns {undefined|{topLeft: {x:number, y:number}, bottomRight: {x:number, y:number}}}
+   */
+  getImageBoundsInViewerPixels() {
+    if (this.mediaType !== MEDIA_TYPES.IMAGE) {
+      return undefined;
+    }
+    const viewer = this.media?.current;
+    if (!viewer || !viewer.world || viewer.world.getItemCount() <= 0 || !viewer.viewport) {
+      return undefined;
+    }
+
+    // Assuming one image in OpenSeadragon for now
+    const tiledImage = viewer.world.getItemAt(0);
+    if (!tiledImage || typeof tiledImage.getBounds !== 'function') return undefined;
+    const bounds = tiledImage.getBounds();
+    if (!bounds || typeof bounds.getTopLeft !== 'function' || typeof bounds.getBottomRight !== 'function') {
+      return undefined;
+    }
+
+    const topLeft = viewer.viewport.viewportToViewerElementCoordinates(bounds.getTopLeft());
+    const bottomRight = viewer.viewport.viewportToViewerElementCoordinates(bounds.getBottomRight());
+    if (!topLeft || !bottomRight) {
+      return undefined;
+    }
+    return { bottomRight, topLeft };
   }
 
   /**
@@ -287,23 +317,4 @@ export class WindowPlayer {
     return Math.max(this.getDisplayedMediaWidth() / 500, 3);
     // TODO DAxid
   }
-}
-
-/** ***********************
- * Get media type of visible canvas
- * @param state
- * @param windowId
- */
-export function checkMediaType(state, windowId) {
-  const audioResources = getVisibleCanvasAudioResources(state, { windowId }) || [];
-  const videoResources = getVisibleCanvasVideoResources(state, { windowId }) || [];
-
-  if (videoResources.length > 0) {
-    return MEDIA_TYPES.VIDEO;
-  }
-  if (audioResources.length > 0) {
-    return MEDIA_TYPES.AUDIO;
-  }
-
-  return MEDIA_TYPES.IMAGE;
 }
