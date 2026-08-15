@@ -32,7 +32,7 @@ const createViewer = ({
       getMaxZoom: vi.fn(() => 1),
       getZoom: vi.fn(() => 0.11),
       viewportToViewerElementCoordinates: vi.fn((point) => (
-        point.x === 0 && point.y === 0 ? topLeft : bottomRight
+        point.x === 1 && point.y === 1 ? bottomRight : topLeft
       )),
     },
     world: {
