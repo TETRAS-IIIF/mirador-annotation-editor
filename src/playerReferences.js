@@ -170,16 +170,21 @@ export class WindowPlayer {
 
   /**
    * Get displayed height of the media. It include zoom and scale stuff
+   *
+   * NOTE: uses OpenSeadragon's TiledImage#getSizeInWindowCoordinates(), which converts the
+   * image's true pixel dimensions to on-screen container pixels while correctly accounting
+   * for zoom/pan/rotation. A previous hand-rolled formula (`containerWidth * trueHeight * zoom`)
+   * multiplied in the true pixel dimension an extra, spurious time, producing wildly wrong
+   * sizes for images whose true pixel dimensions differ a lot from the container size
+   * (see issue #267).
    * @returns {undefined|*|number}
    */
   getDisplayedMediaHeight() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
       const viewer = this.media.current;
-      if (viewer) {
-        const percentageHeight = this.getMediaTrueHeight() * viewer.viewport.getZoom();
-        const containerWidth = viewer.container.clientWidth;
-        const actualHeightInPixels = Math.round(containerWidth * percentageHeight);
-        return actualHeightInPixels;
+      if (viewer && viewer.world.getItemCount() > 0) {
+        const tiledImage = viewer.world.getItemAt(0);
+        return Math.round(tiledImage.getSizeInWindowCoordinates().y);
       }
     }
     return undefined;
@@ -193,10 +198,8 @@ export class WindowPlayer {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
       const viewer = this.media.current;
       if (viewer && viewer.world.getItemCount() > 0) {
-        const percentageWidth = this.getMediaTrueWidth() * viewer.viewport.getZoom();
-        const containerWidth = viewer.container.clientWidth;
-        const actualWidthInPixels = Math.round(containerWidth * percentageWidth);
-        return actualWidthInPixels;
+        const tiledImage = viewer.world.getItemAt(0);
+        return Math.round(tiledImage.getSizeInWindowCoordinates().x);
       }
     }
     return undefined;
