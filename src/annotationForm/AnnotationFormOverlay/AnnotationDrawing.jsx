@@ -77,7 +77,7 @@ export default function AnnotationDrawing(
       return;
     }
 
-    if (e.key === 'Delete') {
+    if (e.key === 'Delete' || e.key === 'Backspace') {
       // eslint-disable-next-line max-len
       const shapesWithoutTheDeleted = drawingState.shapes.filter((shape) => shape.id !== drawingState.currentShape.id);
       setDrawingState({
@@ -93,8 +93,8 @@ export default function AnnotationDrawing(
       return;
     }
 
-    // release the drawing
-    if (e.key === 'Escape') {
+      // release the drawing
+    if (e.key === 'Tab') {
       if (toolState.activeTool === OVERLAY_TOOL.IMAGE) {
         return;
       }
@@ -111,6 +111,22 @@ export default function AnnotationDrawing(
         currentShape: null,
         isDrawing: false,
       });
+      return;
+    }
+
+    // Close polygon on key
+    if (e.key === 'Shift') {
+      if (toolState.activeTool === SHAPES_TOOL.POLYGON && drawingState.isDrawing) {
+        drawingState.currentShape.points.splice(-2, 2);
+        const closedShape = { ...drawingState.currentShape, closed: true };
+        updateCurrentShapeInShapes(closedShape);
+        setDrawingState({
+          ...drawingState,
+          currentShape: closedShape,
+          isDrawing: false,
+        });
+        setIsDrawing(false);
+      }
       return;
     }
 
@@ -178,7 +194,6 @@ export default function AnnotationDrawing(
   const onShapeClick = async (shp) => {
     // return if we are not in edit or cursor mode
     if (toolState.activeTool !== 'edit' && toolState.activeTool !== 'cursor' && toolState.activeTool !== 'delete') {
-      console.log('En dehors d\'une shape click');
       return;
     }
     const shape = drawingState.shapes.find((s) => s.id === shp.id);
@@ -215,10 +230,7 @@ export default function AnnotationDrawing(
    * @param {Object} evt - The event object containing the target shape's modified attributes.
    */
   const onTransform = (evt) => {
-    console.log('onTransform');
-
     const modifiedShape = evt.target.attrs;
-
     const shape = drawingState.shapes.find((s) => s.id === modifiedShape.id);
 
     Object.assign(shape, modifiedShape);
@@ -408,6 +420,26 @@ export default function AnnotationDrawing(
           break;
         case SHAPES_TOOL.POLYGON:
           if (drawingState.isDrawing) {
+            // Check if clicking near the first point to close the polygon
+            const firstX = drawingState.currentShape.points[0];
+            const firstY = drawingState.currentShape.points[1];
+            const closeThreshold = 15 / scale;
+            const distToFirst = Math.sqrt(
+              (pos.x - firstX) ** 2 + (pos.y - firstY) ** 2,
+            );
+            if (distToFirst <= closeThreshold && drawingState.currentShape.points.length > 6) {
+              // Close the polygon
+              const closedShape = { ...drawingState.currentShape, closed: true };
+              closedShape.points.splice(-2, 2);
+              updateCurrentShapeInShapes(closedShape);
+              setDrawingState({
+                ...drawingState,
+                currentShape: closedShape,
+                isDrawing: false,
+              });
+              setIsDrawing(false);
+              break;
+            }
             drawingState.currentShape.points.splice(-2, 2, pos.x, pos.y);
             drawingState.currentShape.points.push(pos.x, pos.y);
             updateCurrentShapeInShapes({
@@ -569,21 +601,12 @@ export default function AnnotationDrawing(
 
   /** Stop drawing */
   const handleMouseUp = (e) => {
-    // TODO Remove after rewiew
-
-    console.debug('handleMouseUp');
-    console.debug(drawingState);
-    console.debug(toolState);
-
-
-
     if (drawingState.currentShape && !isResizing) {
       const stage = e.target.getStage();
       const clickedOnEmpty = e.target === stage;
       // I click on stage, not on a shape
       if (clickedOnEmpty) {
         const currentShapeType = drawingState.currentShape.type;
-        console.log('currentShapeType', currentShapeType);
         setToolState((prev) => ({
           ...prev,
           activeTool: currentShapeType,

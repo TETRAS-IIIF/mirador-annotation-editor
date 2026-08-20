@@ -61,6 +61,7 @@ export const en = {
   onlyOneImageAllowed: 'Only one image is allowed',
   overlay: 'Overlay',
   polygon: 'Polygon',
+  pressEnterOrClickFirstPointToClose: 'Click first point or press "Shift" to close polygon, "Tab" to leave open',
   pressEnterToAddTag: 'Add your tag and press "Enter"',
   pressEscapeToFinish: 'Press "Esc" to finish the line',
   rectangle: 'Rectangle',
