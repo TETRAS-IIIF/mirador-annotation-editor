@@ -105,9 +105,10 @@ export function showKonvaStage() {
  * that point. This bakes a stray opaque white box into every exported annotation target on
  * such screens (see issue #267).
  *
- * Real annotation shapes always get an explicit `stroke` set by `cleanNode` below, so a
- * strokeless, opaque-white `<rect>` can only be this export artifact, never user content -
- * safe to strip.
+ * Real annotation shapes always get an explicit, real-color `stroke` set by `cleanNode`
+ * below, so a `<rect>` with no stroke - or with `stroke="none"`, which is how the
+ * `svgcanvas` shim itself writes out the artifact rect - can only be this export
+ * artifact, never user content, whenever its fill is opaque white. Safe to strip.
  * @param {string} svg
  * @returns {string}
  */
@@ -116,7 +117,9 @@ export function stripSpuriousWhiteBackgroundRect(svg) {
   doc.querySelectorAll('rect').forEach((rect) => {
     const fill = (rect.getAttribute('fill') || '').trim().toLowerCase();
     const isOpaqueWhite = fill === '#ffffff' || fill === '#fff' || fill === 'white';
-    if (isOpaqueWhite && !rect.hasAttribute('stroke')) {
+    const stroke = (rect.getAttribute('stroke') || 'none').trim().toLowerCase();
+    const hasNoRealStroke = stroke === 'none' || stroke === '';
+    if (isOpaqueWhite && hasNoRealStroke) {
       rect.remove();
     }
   });
