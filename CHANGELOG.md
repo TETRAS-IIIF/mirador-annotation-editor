@@ -9,6 +9,12 @@ Entries types:
 - `FIXED` for any bug fixes.
 - `SECURITY` to invite users to upgrade in case of vulnerabilities.
 
+## [1.3.3 ]
+
+- SECURITY : Update dependencies to fix vulnerabilities
+- FIXED : Fix white background on generated annotation
+- FIXED : Polygon tools
+
 ## [1.3.2 ]
 
 - SECURITY : Update dependencies to fix vulnerabilities
