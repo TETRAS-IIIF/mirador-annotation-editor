@@ -49,6 +49,7 @@ function createWrapper(props) {
       windowId="abc"
       {...props}
     />,
+    { preloadedState: { config: { annotation: {} } } },
   );
 }
 
@@ -111,5 +112,29 @@ describe('TextCreation', () => {
       },
     });
     expect(wrapper).toBeDefined();
+  });
+
+  it('offers comment templates (via the shared TextCommentInput) when configured, with no tags input', () => {
+    const mockT = vi.fn().mockImplementation((key) => key);
+    render(
+      <TextCommentTemplate
+        annotation={{}}
+        closeFormCompanionWindow={vi.fn()}
+        playerReferences={playerReferences}
+        saveAnnotation={vi.fn()}
+        t={mockT}
+        windowId="abc"
+      />,
+      {
+        preloadedState: {
+          config: { annotation: { commentTemplates: [{ content: 'Hi!', title: 'Greeting' }] } },
+        },
+      },
+    );
+
+    expect(screen.getByText('useTemplate')).toBeInTheDocument();
+    // Phase 4 (tetras-dfb/root_repo#12): reuses TextCommentInput but not MultiTagsInput -
+    // TEXT_TYPE annotations have no tags array, unlike MultipleBodyTemplate.
+    expect(screen.queryByText('tags')).not.toBeInTheDocument();
   });
 });

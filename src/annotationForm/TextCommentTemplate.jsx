@@ -7,7 +7,7 @@ import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtil
 import { convertSingleBodyAnnotationToBeSaved } from '../IIIFUtils';
 import { templateKit } from './templateKit';
 
-const { AnnotationFormFooter, TargetFormSection, TextFormSection } = templateKit;
+const { AnnotationFormFooter, TargetFormSection, TextCommentInput } = templateKit;
 
 const DEFAULT_BODY_VALUE = 'Annotation';
 
@@ -18,8 +18,15 @@ const DEFAULT_BODY_VALUE = 'Annotation';
  */
 export const convertTextCommentAnnotationToBeSaved = convertSingleBodyAnnotationToBeSaved;
 
-// This template is only keep for backward compatibility, it will be removed in the future
-// Use MultipleBodyTemplate instead and set the templateType to TEMPLATE.MULTIPLE_BODY_TYPE
+// This template is only kept for backward compatibility, it will be removed in the future.
+// Use MultipleBodyTemplate instead and set the templateType to TEMPLATE.MULTIPLE_BODY_TYPE.
+// Phase 4 of the annotation-template migration (tetras-dfb/root_repo#12) retired part of its
+// duplication with MultipleBodyTemplate by reusing TextCommentInput (the same rich-text/
+// quick-template widget) instead of maintaining a separate, plainer TextFormSection. It does
+// NOT reuse MultipleBodyTemplate's tags input or component wholesale: TEXT_TYPE's stored shape
+// (a single body object, no tags array) and templateType are kept exactly as before - adding
+// tag support here would silently change what gets saved for existing legacy annotations,
+// which is the one thing this migration was explicitly asked not to do.
 /** Form part for edit annotation content and body */
 function TextCommentTemplate(
   {
@@ -67,6 +74,16 @@ function TextCommentTemplate(
     });
   };
 
+  /**
+   * When the user selects a comment template, replace the body value with its content.
+   * Unlike MultipleBodyTemplate's onChangeTemplate, there is no tag to associate: TEXT_TYPE
+   * annotations have no tags array.
+   * @param selectedTemplate
+   */
+  const onChangeTemplate = (selectedTemplate) => {
+    updateAnnotationTextualBodyValue(selectedTemplate.content);
+  };
+
   /** this code update annotationState with maeDate * */
   const updateTargetState = (target) => {
     const newMaeData = annotationState.maeData;
@@ -98,9 +115,10 @@ function TextCommentTemplate(
   return (
     <Grid container direction="column" spacing={2}>
       <Grid>
-        <TextFormSection
-          annoHtml={annotationState.body.value}
-          updateAnnotationBody={updateAnnotationTextualBodyValue}
+        <TextCommentInput
+          comment={annotationState.body.value}
+          setComment={updateAnnotationTextualBodyValue}
+          onChangeTemplate={onChangeTemplate}
           t={t}
         />
       </Grid>
