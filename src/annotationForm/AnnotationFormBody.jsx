@@ -34,6 +34,9 @@ export default function AnnotationFormBody(
 
       <TemplateContainer>
         {
+          // Every template receives the same full prop set regardless of which ones it
+          // actually declares/uses (e.g. only IIIFTemplate uses `canvases`) - simpler than
+          // special-casing props per registry entry, and unused props are harmless.
           TemplateComponent && (
             <TemplateComponent
               annotation={annotation}

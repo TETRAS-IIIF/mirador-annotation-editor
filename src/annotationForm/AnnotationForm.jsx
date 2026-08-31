@@ -5,6 +5,7 @@ import { ConnectedCompanionWindow } from 'mirador';
 import PropTypes from 'prop-types';
 import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
 import AnnotationFormTemplateSelector from './AnnotationFormTemplateSelector';
 import {
   saveAnnotationInStorageAdapter, TEMPLATE, DEFAULT_FORM_MAP,
@@ -58,8 +59,13 @@ function AnnotationForm(
   if (!templateType) {
     if (annotation.id) {
       if (annotation.maeData && annotation.maeData.templateType) {
-        // Annotation has been created with MAE
-        setTemplateType(getTemplateType(t, annotation.maeData.templateType));
+        // Annotation has been created with MAE. Fall back to IIIF_TYPE (expert/raw mode,
+        // same as the "no maeData" branch below) if templateType isn't one the registry
+        // knows about, instead of crashing downstream on an undefined templateType.
+        setTemplateType(
+          getTemplateType(t, annotation.maeData.templateType)
+            ?? getTemplateType(t, TEMPLATE.IIIF_TYPE),
+        );
       } else {
         // Annotation has been created with other IIIF annotation editor
         setTemplateType(getTemplateType(t, TEMPLATE.IIIF_TYPE));
@@ -158,11 +164,20 @@ function AnnotationForm(
       .map(async (canvas) => {
         let annotationStateToBeSaved;
         if (annotationProps?.maeData && annotationProps.maeData.templateType) {
-          const { convertToAnnotation } = getTemplateType(t, annotationProps.maeData.templateType);
-          annotationStateToBeSaved = await convertToAnnotation(
-            annotationProps,
-            { canvas, playerReferences, windowId },
-          );
+          // Fall back to the shared converter directly for a templateType the registry
+          // doesn't know about (e.g. legacy/externally-sourced data), instead of throwing.
+          const registryEntry = getTemplateType(t, annotationProps.maeData.templateType);
+          annotationStateToBeSaved = registryEntry
+            ? await registryEntry.convertToAnnotation(
+              annotationProps,
+              { canvas, playerReferences, windowId },
+            )
+            : await convertAnnotationStateToBeSaved(
+              annotationProps,
+              canvas,
+              windowId,
+              playerReferences,
+            );
         } else {
           annotationStateToBeSaved = annotationProps;
         }
