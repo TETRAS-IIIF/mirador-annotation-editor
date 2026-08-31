@@ -11,7 +11,10 @@ import { getTemplateType, TEMPLATE_TYPES } from '../src/annotationForm/templateR
 // templateType.id to. These tests pin down that dispatch behavior.
 
 vi.mock('../src/annotationForm/TextCommentTemplate', () => ({ default: () => <div data-testid="TextCommentTemplate" /> }));
-vi.mock('../src/annotationForm/TaggingTemplate', () => ({ default: () => <div data-testid="TaggingTemplate" /> }));
+vi.mock('../src/annotationForm/TaggingTemplate', () => ({
+  convertTaggingAnnotationToBeSaved: vi.fn(),
+  default: () => <div data-testid="TaggingTemplate" />,
+}));
 vi.mock('../src/annotationForm/IIIFTemplate', () => ({ default: () => <div data-testid="IIIFTemplate" /> }));
 vi.mock('../src/annotationForm/MultipleBodyTemplate', () => ({ default: () => <div data-testid="MultipleBodyTemplate" /> }));
 

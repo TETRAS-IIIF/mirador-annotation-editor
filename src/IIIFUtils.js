@@ -450,44 +450,29 @@ export const isEmptyValue = (value) => {
  * Get default value for the annotation body when the body is empty. The default value is a string with the current date and time.
  * @returns {`${string}`}
  */
-const getDefaultValue = () => `${new Date().toLocaleString()}`;
+export const getDefaultValue = () => `${new Date().toLocaleString()}`;
+
 /**
- * Convert annotation state to be saved. Function change the annotationState object
- * @param annotationState
- * @param canvas
- * @param windowId
- * @param playerReferences
- * @returns {Promise<void>}
+ * Shared, template-agnostic tail end of "convert annotationState to be saved": strips
+ * maeData.target down to its known keys, captures an SVG snapshot of any drawn shapes,
+ * computes the target's scale, derives the saved `target` (a xywh string or an SVG/Fragment
+ * selector), and stringifies drawingState for storage. Every template with a spatial target
+ * (i.e. every template except IIIF_TYPE, which returns its annotationState unchanged before
+ * reaching this point) shares this exact pipeline - only what happens to `.body`/`.maeData.tags`
+ * before calling this is template-specific.
+ * @param {object} annotationState
+ * @param {object} canvas
+ * @param {string} windowId
+ * @param {object} playerReferences
+ * @returns {Promise<object>} the same annotationState, mutated
  */
-export const convertAnnotationStateToBeSaved = async (
+export const finalizeSpatialTarget = async (
   annotationState,
   canvas,
   windowId,
   playerReferences,
 ) => {
   const annotationStateForSaving = annotationState;
-
-  if (annotationState.maeData.templateType === TEMPLATE.IIIF_TYPE) {
-    return annotationState;
-  }
-
-  // Duplicated code, not ideal but it will be erase by isolation template refactoring.
-  // All template will integrate their specific logic to convert annotationState to be saved in
-  // their own way, so we will not need this big function anymore.
-  if (
-    annotationStateForSaving.body
-      && !Array.isArray(annotationStateForSaving.body)
-      && isEmptyValue(annotationStateForSaving.body.value)
-  ) {
-    annotationStateForSaving.body.value = getDefaultValue();
-  }
-
-  if (
-    annotationStateForSaving.maeData?.textBody
-      && isEmptyValue(annotationStateForSaving.maeData.textBody.value)
-  ) {
-    annotationStateForSaving.maeData.textBody.value = getDefaultValue();
-  }
 
   // TODO I dont know why this code is here? To clean the object ?
   annotationStateForSaving.maeData.target = {
@@ -498,25 +483,10 @@ export const convertAnnotationStateToBeSaved = async (
     tstart: annotationStateForSaving.maeData.target.tstart,
   };
 
-  console.info('Annotation state target', annotationState.maeData.target);
+  console.info('Annotation state target', annotationStateForSaving.maeData.target);
 
-  if (annotationStateForSaving.maeData.templateType === TEMPLATE.TAGGING_TYPE
-    || annotationStateForSaving.maeData.templateType === TEMPLATE.TEXT_TYPE
-    || annotationStateForSaving.maeData.templateType === TEMPLATE.MULTIPLE_BODY_TYPE) {
-    // Complex annotation
-    if (annotationStateForSaving.maeData.target.drawingState.shapes.length > 0) {
-      annotationStateForSaving.maeData.target.svg = await getSvg(windowId);
-    }
-  }
-
-  if (annotationStateForSaving.maeData.templateType === TEMPLATE.MULTIPLE_BODY_TYPE) {
-    annotationStateForSaving.body = [annotationState.maeData.textBody];
-    annotationStateForSaving.body.push(...annotationState.maeData.tags.map((tag) => ({
-      id: tag.value,
-      purpose: 'tagging',
-      type: 'TextualBody',
-      value: tag.value,
-    })));
+  if (annotationStateForSaving.maeData.target.drawingState.shapes.length > 0) {
+    annotationStateForSaving.maeData.target.svg = await getSvg(windowId);
   }
 
   if (isAnnotationExportableToImage(annotationStateForSaving.maeData)) {
@@ -541,6 +511,58 @@ export const convertAnnotationStateToBeSaved = async (
   );
 
   return annotationStateForSaving;
+};
+
+/**
+ * Convert annotation state to be saved. Function change the annotationState object
+ *
+ * NOTE: handles TEXT_TYPE and MULTIPLE_BODY_TYPE only. TAGGING_TYPE has its own
+ * convertTaggingAnnotationToBeSaved (see TaggingTemplate.jsx) - the first step of the
+ * per-template conversion-logic migration described in tetras-dfb/root_repo#12.
+ * @param annotationState
+ * @param canvas
+ * @param windowId
+ * @param playerReferences
+ * @returns {Promise<void>}
+ */
+export const convertAnnotationStateToBeSaved = async (
+  annotationState,
+  canvas,
+  windowId,
+  playerReferences,
+) => {
+  const annotationStateForSaving = annotationState;
+
+  if (annotationState.maeData.templateType === TEMPLATE.IIIF_TYPE) {
+    return annotationState;
+  }
+
+  if (
+    annotationStateForSaving.body
+      && !Array.isArray(annotationStateForSaving.body)
+      && isEmptyValue(annotationStateForSaving.body.value)
+  ) {
+    annotationStateForSaving.body.value = getDefaultValue();
+  }
+
+  if (
+    annotationStateForSaving.maeData?.textBody
+      && isEmptyValue(annotationStateForSaving.maeData.textBody.value)
+  ) {
+    annotationStateForSaving.maeData.textBody.value = getDefaultValue();
+  }
+
+  if (annotationStateForSaving.maeData.templateType === TEMPLATE.MULTIPLE_BODY_TYPE) {
+    annotationStateForSaving.body = [annotationState.maeData.textBody];
+    annotationStateForSaving.body.push(...annotationState.maeData.tags.map((tag) => ({
+      id: tag.value,
+      purpose: 'tagging',
+      type: 'TextualBody',
+      value: tag.value,
+    })));
+  }
+
+  return finalizeSpatialTarget(annotationStateForSaving, canvas, windowId, playerReferences);
 };
 
 //* *******************************************

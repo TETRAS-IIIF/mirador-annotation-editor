@@ -5,7 +5,7 @@ import React from 'react';
 import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
 import IIIFTemplate from './IIIFTemplate';
 import MultipleBodyTemplate from './MultipleBodyTemplate';
-import TaggingTemplate from './TaggingTemplate';
+import TaggingTemplate, { convertTaggingAnnotationToBeSaved } from './TaggingTemplate';
 import TextCommentTemplate from './TextCommentTemplate';
 import { MEDIA_TYPES, TEMPLATE } from './AnnotationFormUtils';
 
@@ -54,7 +54,7 @@ export const TEMPLATE_REGISTRY = (t) => [
   },
   {
     Component: TaggingTemplate,
-    convertToAnnotation: delegateToSharedConverter,
+    convertToAnnotation: convertTaggingAnnotationToBeSaved,
     description: t('tag_with_target'),
     icon: <LocalOfferIcon fontSize="small" />,
     id: TEMPLATE.TAGGING_TYPE,

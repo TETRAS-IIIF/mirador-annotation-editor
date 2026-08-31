@@ -9,6 +9,27 @@ import { TEMPLATE } from './AnnotationFormUtils';
 import TargetFormSection from './TargetFormSection';
 import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
 import { getContextParams } from '../contextParams';
+import { finalizeSpatialTarget, getDefaultValue, isEmptyValue } from '../IIIFUtils';
+
+/**
+ * Convert a TaggingTemplate annotationState into a savable IIIF annotation. Tagging has no
+ * body array or tags to build (unlike MultipleBodyTemplate) and no textBody (unlike
+ * TextCommentTemplate/MultipleBodyTemplate) - only its single `body.value` needs defaulting
+ * before the shared spatial-target pipeline runs.
+ * @param {object} state
+ * @param {{ canvas: object, windowId: string, playerReferences: object }} ctx
+ * @returns {Promise<object>}
+ */
+export const convertTaggingAnnotationToBeSaved = async (
+  state,
+  { canvas, windowId, playerReferences },
+) => {
+  const stateToSave = state;
+  if (isEmptyValue(stateToSave.body.value)) {
+    stateToSave.body.value = getDefaultValue();
+  }
+  return finalizeSpatialTarget(stateToSave, canvas, windowId, playerReferences);
+};
 
 /** Tagging Template* */
 export default function TaggingTemplate(
