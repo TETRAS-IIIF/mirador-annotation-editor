@@ -19,6 +19,7 @@ function renderSelector(mediaType, setCommentingType = vi.fn()) {
     <I18nextProvider i18n={i18n}>
       <AnnotationFormTemplateSelector mediaType={mediaType} setCommentingType={setCommentingType} />
     </I18nextProvider>,
+    { preloadedState: { config: { annotation: {} } } },
   );
 }
 
@@ -55,5 +56,34 @@ describe('AnnotationFormTemplateSelector', () => {
     screen.getByRole('button', { name: /note/i }).click();
 
     expect(setCommentingType).toHaveBeenCalledWith(expect.objectContaining({ id: 'multiple_body', label: 'note' }));
+  });
+
+  it('offers an externally-registered template (Phase 5, issue #12) alongside the built-in ones', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <AnnotationFormTemplateSelector mediaType={MEDIA_TYPES.IMAGE} setCommentingType={vi.fn()} />
+      </I18nextProvider>,
+      {
+        preloadedState: {
+          config: {
+            annotation: {
+              externalTemplates: [{
+                Component: () => null,
+                convertToAnnotation: vi.fn(),
+                description: 'An externally-registered template',
+                icon: null,
+                id: 'my-plugin/custom-template',
+                isCompatibleWithMediaType: () => true,
+                label: 'Custom',
+                selectable: true,
+              }],
+            },
+          },
+        },
+      },
+    );
+
+    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(screen.getByText('note')).toBeInTheDocument();
   });
 });

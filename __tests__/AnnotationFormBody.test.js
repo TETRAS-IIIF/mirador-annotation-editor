@@ -4,7 +4,9 @@ import { i18n } from '../setupTest';
 import { render, screen } from './test-utils';
 import AnnotationFormBody from '../src/annotationForm/AnnotationFormBody';
 import { TEMPLATE } from '../src/annotationForm/AnnotationFormUtils';
-import { getTemplateType, TEMPLATE_TYPES } from '../src/annotationForm/templateRegistry';
+import {
+  getTemplateType, TEMPLATE_REGISTRY, TEMPLATE_TYPES,
+} from '../src/annotationForm/templateRegistry';
 
 // Dispatch tests for issue #12 (https://github.com/Tetras-dfb/root_repo/issues/12): AnnotationFormBody
 // renders whichever template component the registry (templateRegistry.jsx, Phase 1) maps a given
@@ -80,6 +82,43 @@ describe('AnnotationFormBody dispatch', () => {
       expect(screen.queryByTestId(id)).not.toBeInTheDocument();
     });
   });
+
+  it('dispatches to an externally-registered template (Phase 5, issue #12) when configured', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <AnnotationFormBody
+          annotation={{}}
+          canvases={[{ id: 'canvas1', index: 0 }]}
+          closeFormCompanionWindow={vi.fn()}
+          playerReferences={{}}
+          saveAnnotation={vi.fn()}
+          templateType={{ id: 'my-plugin/custom-template', label: 'Custom' }}
+          windowId="window1"
+        />
+      </I18nextProvider>,
+      {
+        preloadedState: {
+          config: {
+            annotation: {
+              adapter: vi.fn(),
+              externalTemplates: [{
+                Component: () => <div data-testid="ExternalTemplate" />,
+                convertToAnnotation: vi.fn(),
+                description: '',
+                icon: null,
+                id: 'my-plugin/custom-template',
+                isCompatibleWithMediaType: () => true,
+                label: 'Custom',
+                selectable: true,
+              }],
+            },
+          },
+        },
+      },
+    );
+
+    expect(screen.getByTestId('ExternalTemplate')).toBeInTheDocument();
+  });
 });
 
 describe('getTemplateType', () => {
@@ -112,5 +151,65 @@ describe('TEMPLATE_TYPES (the template picker list)', () => {
     expect(TEMPLATE_TYPES(mockT).map((entry) => entry.id).sort()).toEqual(
       [TEMPLATE.MULTIPLE_BODY_TYPE, TEMPLATE.TAGGING_TYPE, TEMPLATE.IIIF_TYPE].sort(),
     );
+  });
+});
+
+describe('TEMPLATE_REGISTRY external registration (Phase 5, issue #12)', () => {
+  /** Identity translation stub */
+  const mockT = (key) => key;
+  /** A minimal, valid external template descriptor */
+  const externalTemplate = () => ({
+    Component: () => <div data-testid="ExternalTemplate" />,
+    convertToAnnotation: vi.fn(),
+    description: 'An externally-registered template',
+    icon: null,
+    id: 'my-plugin/custom-template',
+    isCompatibleWithMediaType: () => true,
+    label: 'Custom',
+    selectable: true,
+  });
+
+  it('appends a valid external template to the registry', () => {
+    const entries = TEMPLATE_REGISTRY(mockT, [externalTemplate()]);
+
+    expect(entries.map((entry) => entry.id)).toContain('my-plugin/custom-template');
+  });
+
+  it('is picked up by getTemplateType/TEMPLATE_TYPES when passed through', () => {
+    const external = [externalTemplate()];
+
+    expect(getTemplateType(mockT, 'my-plugin/custom-template', external)?.label).toBe('Custom');
+    expect(TEMPLATE_TYPES(mockT, external).map((entry) => entry.id))
+      .toContain('my-plugin/custom-template');
+  });
+
+  it('drops (and warns about) an external template whose id collides with a built-in one', () => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const colliding = { ...externalTemplate(), id: TEMPLATE.TAGGING_TYPE };
+
+    const entries = TEMPLATE_REGISTRY(mockT, [colliding]);
+
+    expect(entries.filter((entry) => entry.id === TEMPLATE.TAGGING_TYPE)).toHaveLength(1);
+    expect(entries.find((entry) => entry.id === TEMPLATE.TAGGING_TYPE).Component)
+      .not.toBe(colliding.Component);
+    expect(consoleWarnSpy).toHaveBeenCalled();
+
+    consoleWarnSpy.mockRestore();
+  });
+
+  it('drops (and warns about) a malformed external template instead of crashing the whole registry', () => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const malformed = { ...externalTemplate(), isCompatibleWithMediaType: undefined };
+
+    const entries = TEMPLATE_REGISTRY(mockT, [malformed]);
+
+    expect(entries.map((entry) => entry.id)).not.toContain('my-plugin/custom-template');
+    expect(consoleWarnSpy).toHaveBeenCalled();
+
+    consoleWarnSpy.mockRestore();
+  });
+
+  it('defaults to no external templates when none are passed', () => {
+    expect(TEMPLATE_REGISTRY(mockT)).toHaveLength(4);
   });
 });
