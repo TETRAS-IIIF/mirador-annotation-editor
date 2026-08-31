@@ -2,24 +2,11 @@ import TextFieldsIcon from '@mui/icons-material/TextFields';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import React from 'react';
-import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
 import IIIFTemplate, { convertIIIFAnnotationToBeSaved } from './IIIFTemplate';
-import MultipleBodyTemplate from './MultipleBodyTemplate';
+import MultipleBodyTemplate, { convertMultipleBodyAnnotationToBeSaved } from './MultipleBodyTemplate';
 import TaggingTemplate, { convertTaggingAnnotationToBeSaved } from './TaggingTemplate';
 import TextCommentTemplate, { convertTextCommentAnnotationToBeSaved } from './TextCommentTemplate';
 import { MEDIA_TYPES, TEMPLATE } from './AnnotationFormUtils';
-
-/**
- * Thin adapter delegating to the still-centralized conversion logic in IIIFUtils.js.
- * MultipleBodyTemplate is the only remaining template using this - the last step of the
- * per-template conversion-logic migration described in tetras-dfb/root_repo#12 (Phase 2d).
- * @param {object} state - the annotationState to convert
- * @param {{ canvas: object, windowId: string, playerReferences: object }} ctx
- * @returns {Promise<object>}
- */
-const delegateToSharedConverter = (state, { canvas, windowId, playerReferences }) => (
-  convertAnnotationStateToBeSaved(state, canvas, windowId, playerReferences)
-);
 
 /** Only IMAGE canvases support any of today's templates */
 const imageOnly = (mediaType) => mediaType === MEDIA_TYPES.IMAGE;
@@ -29,6 +16,11 @@ const imageOnly = (mediaType) => mediaType === MEDIA_TYPES.IMAGE;
  * truth for which template components exist, which are user-selectable from the template
  * picker, and how each converts its own state into a savable IIIF annotation. Replaces the
  * previous hardcoded TEMPLATE_TYPES array and the AnnotationFormBody if-chain.
+ *
+ * As of Phase 2d, every entry's convertToAnnotation is owned by its own template module -
+ * there is no more central "convert annotationState" function branching on templateType.
+ * convertAnnotationStateToBeSaved still exists in IIIFUtils.js, but only as
+ * AnnotationForm.jsx's fallback for a templateType this registry doesn't recognize.
  *
  * Contract per entry:
  * - id: one of the TEMPLATE.* constants
@@ -44,7 +36,7 @@ const imageOnly = (mediaType) => mediaType === MEDIA_TYPES.IMAGE;
 export const TEMPLATE_REGISTRY = (t) => [
   {
     Component: MultipleBodyTemplate,
-    convertToAnnotation: delegateToSharedConverter,
+    convertToAnnotation: convertMultipleBodyAnnotationToBeSaved,
     description: t('textual_note_with_target'),
     icon: <TextFieldsIcon />,
     id: TEMPLATE.MULTIPLE_BODY_TYPE,

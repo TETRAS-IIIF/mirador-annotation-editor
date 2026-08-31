@@ -22,7 +22,10 @@ vi.mock('../src/annotationForm/IIIFTemplate', () => ({
   convertIIIFAnnotationToBeSaved: vi.fn(),
   default: () => <div data-testid="IIIFTemplate" />,
 }));
-vi.mock('../src/annotationForm/MultipleBodyTemplate', () => ({ default: () => <div data-testid="MultipleBodyTemplate" /> }));
+vi.mock('../src/annotationForm/MultipleBodyTemplate', () => ({
+  convertMultipleBodyAnnotationToBeSaved: vi.fn(),
+  default: () => <div data-testid="MultipleBodyTemplate" />,
+}));
 
 const ALL_TEMPLATE_TESTIDS = ['TextCommentTemplate', 'TaggingTemplate', 'IIIFTemplate', 'MultipleBodyTemplate'];
 

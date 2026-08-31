@@ -10,6 +10,36 @@ import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtil
 import { MultiTagsInput } from './MultiTagsInput';
 import { getContextParams } from '../contextParams';
 import { TextCommentInput } from './TextCommentInput';
+import { finalizeSpatialTarget, getDefaultValue, isEmptyValue } from '../IIIFUtils';
+
+/**
+ * Convert a MultipleBodyTemplate annotationState into a savable IIIF annotation: default an
+ * empty maeData.textBody.value, build the saved `body` array from textBody + tags, then
+ * finalize the spatial target.
+ * @param {object} state
+ * @param {{ canvas: object, windowId: string, playerReferences: object }} ctx
+ * @returns {Promise<object>}
+ */
+export const convertMultipleBodyAnnotationToBeSaved = async (
+  state,
+  { canvas, windowId, playerReferences },
+) => {
+  const stateToSave = state;
+  if (
+    stateToSave.maeData?.textBody
+      && isEmptyValue(stateToSave.maeData.textBody.value)
+  ) {
+    stateToSave.maeData.textBody.value = getDefaultValue();
+  }
+  stateToSave.body = [stateToSave.maeData.textBody];
+  stateToSave.body.push(...stateToSave.maeData.tags.map((tag) => ({
+    id: tag.value,
+    purpose: 'tagging',
+    type: 'TextualBody',
+    value: tag.value,
+  })));
+  return finalizeSpatialTarget(stateToSave, canvas, windowId, playerReferences);
+};
 
 /** Tagging Template* */
 export default function MultipleBodyTemplate(

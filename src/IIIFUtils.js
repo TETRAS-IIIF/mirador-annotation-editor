@@ -540,10 +540,15 @@ export const convertSingleBodyAnnotationToBeSaved = async (
 /**
  * Convert annotation state to be saved. Function change the annotationState object
  *
- * NOTE: handles MULTIPLE_BODY_TYPE only now. TAGGING_TYPE and TEXT_TYPE have their own
- * convertTaggingAnnotationToBeSaved/convertTextCommentAnnotationToBeSaved (see
- * TaggingTemplate.jsx/TextCommentTemplate.jsx) - steps of the per-template conversion-logic
- * migration described in tetras-dfb/root_repo#12.
+ * NOTE: as of Phase 2d of the per-template conversion-logic migration described in
+ * tetras-dfb/root_repo#12, every templateType in templateRegistry.jsx owns its own
+ * convertToAnnotation (see convertTaggingAnnotationToBeSaved/
+ * convertTextCommentAnnotationToBeSaved/convertIIIFAnnotationToBeSaved/
+ * convertMultipleBodyAnnotationToBeSaved), so this function is no longer used by any registry
+ * entry. It is kept only as AnnotationForm.jsx's fallback for a templateType the registry
+ * doesn't recognize (e.g. corrupted/legacy data) - see the registryEntry ?? fallback in
+ * saveAnnotation. Behavior is otherwise unchanged from before Phase 2 and is still
+ * characterized directly by IIIFUtils.test.js.
  * @param annotationState
  * @param canvas
  * @param windowId
