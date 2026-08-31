@@ -5,6 +5,15 @@ import { JsonEditor } from 'json-edit-react';
 import AnnotationFormFooter from './AnnotationFormFooter';
 
 /**
+ * Convert an IIIFTemplate annotationState into a savable IIIF annotation. IIIF_TYPE
+ * ("expert mode") annotations are a raw, hand-edited IIIF annotation via the JSON editor
+ * below - there is nothing to convert.
+ * @param {object} state
+ * @returns {Promise<object>}
+ */
+export const convertIIIFAnnotationToBeSaved = async (state) => state;
+
+/**
  * IIIFTemplate component
  * @param annotation
  * @param canvases

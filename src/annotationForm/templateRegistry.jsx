@@ -3,7 +3,7 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import React from 'react';
 import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
-import IIIFTemplate from './IIIFTemplate';
+import IIIFTemplate, { convertIIIFAnnotationToBeSaved } from './IIIFTemplate';
 import MultipleBodyTemplate from './MultipleBodyTemplate';
 import TaggingTemplate, { convertTaggingAnnotationToBeSaved } from './TaggingTemplate';
 import TextCommentTemplate, { convertTextCommentAnnotationToBeSaved } from './TextCommentTemplate';
@@ -11,8 +11,8 @@ import { MEDIA_TYPES, TEMPLATE } from './AnnotationFormUtils';
 
 /**
  * Thin adapter delegating to the still-centralized conversion logic in IIIFUtils.js.
- * A later phase of the annotation-template migration (tetras-dfb/root_repo#12) will move
- * each template's own conversion logic here instead of delegating to the shared function.
+ * MultipleBodyTemplate is the only remaining template using this - the last step of the
+ * per-template conversion-logic migration described in tetras-dfb/root_repo#12 (Phase 2d).
  * @param {object} state - the annotationState to convert
  * @param {{ canvas: object, windowId: string, playerReferences: object }} ctx
  * @returns {Promise<object>}
@@ -64,7 +64,7 @@ export const TEMPLATE_REGISTRY = (t) => [
   },
   {
     Component: IIIFTemplate,
-    convertToAnnotation: delegateToSharedConverter,
+    convertToAnnotation: convertIIIFAnnotationToBeSaved,
     description: t('edit_iiif_json_code'),
     icon: <DataObjectIcon fontSize="small" />,
     id: TEMPLATE.IIIF_TYPE,
