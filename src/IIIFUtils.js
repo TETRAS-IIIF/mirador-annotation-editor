@@ -516,9 +516,10 @@ export const finalizeSpatialTarget = async (
 /**
  * Convert annotation state to be saved. Function change the annotationState object
  *
- * NOTE: handles TEXT_TYPE and MULTIPLE_BODY_TYPE only. TAGGING_TYPE has its own
- * convertTaggingAnnotationToBeSaved (see TaggingTemplate.jsx) - the first step of the
- * per-template conversion-logic migration described in tetras-dfb/root_repo#12.
+ * NOTE: handles MULTIPLE_BODY_TYPE only now. TAGGING_TYPE and TEXT_TYPE have their own
+ * convertTaggingAnnotationToBeSaved/convertTextCommentAnnotationToBeSaved (see
+ * TaggingTemplate.jsx/TextCommentTemplate.jsx) - steps of the per-template conversion-logic
+ * migration described in tetras-dfb/root_repo#12.
  * @param annotationState
  * @param canvas
  * @param windowId

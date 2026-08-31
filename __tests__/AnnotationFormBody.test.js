@@ -10,7 +10,10 @@ import { getTemplateType, TEMPLATE_TYPES } from '../src/annotationForm/templateR
 // renders whichever template component the registry (templateRegistry.jsx, Phase 1) maps a given
 // templateType.id to. These tests pin down that dispatch behavior.
 
-vi.mock('../src/annotationForm/TextCommentTemplate', () => ({ default: () => <div data-testid="TextCommentTemplate" /> }));
+vi.mock('../src/annotationForm/TextCommentTemplate', () => ({
+  convertTextCommentAnnotationToBeSaved: vi.fn(),
+  default: () => <div data-testid="TextCommentTemplate" />,
+}));
 vi.mock('../src/annotationForm/TaggingTemplate', () => ({
   convertTaggingAnnotationToBeSaved: vi.fn(),
   default: () => <div data-testid="TaggingTemplate" />,

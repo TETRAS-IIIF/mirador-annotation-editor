@@ -7,8 +7,28 @@ import TargetFormSection from './TargetFormSection';
 import AnnotationFormFooter from './AnnotationFormFooter';
 import { TEMPLATE } from './AnnotationFormUtils';
 import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
+import { finalizeSpatialTarget, getDefaultValue, isEmptyValue } from '../IIIFUtils';
 
 const DEFAULT_BODY_VALUE = 'Annotation';
+
+/**
+ * Convert a TextCommentTemplate annotationState into a savable IIIF annotation. Same shape as
+ * TaggingTemplate's converter: a single `body.value` to default, no tags/textBody, then the
+ * shared spatial-target pipeline.
+ * @param {object} state
+ * @param {{ canvas: object, windowId: string, playerReferences: object }} ctx
+ * @returns {Promise<object>}
+ */
+export const convertTextCommentAnnotationToBeSaved = async (
+  state,
+  { canvas, windowId, playerReferences },
+) => {
+  const stateToSave = state;
+  if (isEmptyValue(stateToSave.body.value)) {
+    stateToSave.body.value = getDefaultValue();
+  }
+  return finalizeSpatialTarget(stateToSave, canvas, windowId, playerReferences);
+};
 
 // This template is only keep for backward compatibility, it will be removed in the future
 // Use MultipleBodyTemplate instead and set the templateType to TEMPLATE.MULTIPLE_BODY_TYPE

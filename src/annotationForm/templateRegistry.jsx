@@ -6,7 +6,7 @@ import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
 import IIIFTemplate from './IIIFTemplate';
 import MultipleBodyTemplate from './MultipleBodyTemplate';
 import TaggingTemplate, { convertTaggingAnnotationToBeSaved } from './TaggingTemplate';
-import TextCommentTemplate from './TextCommentTemplate';
+import TextCommentTemplate, { convertTextCommentAnnotationToBeSaved } from './TextCommentTemplate';
 import { MEDIA_TYPES, TEMPLATE } from './AnnotationFormUtils';
 
 /**
@@ -77,7 +77,7 @@ export const TEMPLATE_REGISTRY = (t) => [
     // templateType: TEMPLATE.TEXT_TYPE must still open and re-save correctly.
     // Never offered in the template picker - use MultipleBodyTemplate instead.
     Component: TextCommentTemplate,
-    convertToAnnotation: delegateToSharedConverter,
+    convertToAnnotation: convertTextCommentAnnotationToBeSaved,
     description: '',
     icon: null,
     id: TEMPLATE.TEXT_TYPE,
