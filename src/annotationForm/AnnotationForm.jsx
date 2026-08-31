@@ -8,8 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
 import AnnotationFormTemplateSelector from './AnnotationFormTemplateSelector';
 import {
-  getTemplateType, saveAnnotationInStorageAdapter, TEMPLATE, DEFAULT_FORM_MAP,
+  saveAnnotationInStorageAdapter, TEMPLATE, DEFAULT_FORM_MAP,
 } from './AnnotationFormUtils';
+import { getTemplateType } from './templateRegistry';
 import { getContextParams } from '../contextParams';
 import AnnotationFormHeader from './AnnotationFormHeader';
 import AnnotationFormBody from './AnnotationFormBody';
@@ -32,6 +33,8 @@ function AnnotationForm(
   },
 ) {
   const { t } = useTranslation();
+  // TEMPLATE_REGISTRY (via getTemplateType) already defaults this to [] on its own if undefined.
+  const { externalTemplates } = config.annotation;
   const [templateType, setTemplateType] = useState(null);
   // eslint-disable-next-line no-underscore-dangle
   const [mediaType, setMediaType] = useState(playerReferences.getMediaType());
@@ -58,8 +61,13 @@ function AnnotationForm(
   if (!templateType) {
     if (annotation.id) {
       if (annotation.maeData && annotation.maeData.templateType) {
-        // Annotation has been created with MAE
-        setTemplateType(getTemplateType(t, annotation.maeData.templateType));
+        // Annotation has been created with MAE. Fall back to IIIF_TYPE (expert/raw mode,
+        // same as the "no maeData" branch below) if templateType isn't one the registry
+        // knows about, instead of crashing downstream on an undefined templateType.
+        setTemplateType(
+          getTemplateType(t, annotation.maeData.templateType, externalTemplates)
+            ?? getTemplateType(t, TEMPLATE.IIIF_TYPE),
+        );
       } else {
         // Annotation has been created with other IIIF annotation editor
         setTemplateType(getTemplateType(t, TEMPLATE.IIIF_TYPE));
@@ -153,17 +161,29 @@ function AnnotationForm(
    */
   const saveAnnotation = (annotationState) => {
     const annotationProps = annotationState;
+    // Looked up once (not per-canvas below): templateType doesn't vary across canvases, and
+    // getTemplateType rebuilds the whole registry (icons included) on every call.
+    const registryEntry = annotationProps?.maeData?.templateType
+      ? getTemplateType(t, annotationProps.maeData.templateType, externalTemplates)
+      : undefined;
 
     const promises = playerReferences.getCanvases()
       .map(async (canvas) => {
         let annotationStateToBeSaved;
         if (annotationProps?.maeData && annotationProps.maeData.templateType) {
-          annotationStateToBeSaved = await convertAnnotationStateToBeSaved(
-            annotationProps,
-            canvas,
-            windowId,
-            playerReferences,
-          );
+          // Fall back to the shared converter directly for a templateType the registry
+          // doesn't know about (e.g. legacy/externally-sourced data), instead of throwing.
+          annotationStateToBeSaved = registryEntry
+            ? await registryEntry.convertToAnnotation(
+              annotationProps,
+              { canvas, playerReferences, windowId },
+            )
+            : await convertAnnotationStateToBeSaved(
+              annotationProps,
+              canvas,
+              windowId,
+              playerReferences,
+            );
         } else {
           annotationStateToBeSaved = annotationProps;
         }
@@ -249,6 +269,8 @@ AnnotationForm.propTypes = {
       defaults: PropTypes.objectOf(
         PropTypes.oneOfType([PropTypes.bool, PropTypes.func, PropTypes.number, PropTypes.string]),
       ),
+      // eslint-disable-next-line react/forbid-prop-types
+      externalTemplates: PropTypes.arrayOf(PropTypes.object),
     }),
     language: PropTypes.string,
     // eslint-disable-next-line react/forbid-prop-types

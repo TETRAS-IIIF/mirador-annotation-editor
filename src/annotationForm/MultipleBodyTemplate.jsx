@@ -3,13 +3,32 @@ import { Grid } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { getConfig } from 'mirador';
-import AnnotationFormFooter from './AnnotationFormFooter';
 import { TEMPLATE } from './AnnotationFormUtils';
-import TargetFormSection from './TargetFormSection';
 import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
-import { MultiTagsInput } from './MultiTagsInput';
 import { getContextParams } from '../contextParams';
-import { TextCommentInput } from './TextCommentInput';
+import { applyMultipleBodyConversion, finalizeSpatialTarget } from '../IIIFUtils';
+import { templateKit } from './templateKit';
+
+const {
+  AnnotationFormFooter, MultiTagsInput, TargetFormSection, TextCommentInput,
+} = templateKit;
+
+/**
+ * Convert a MultipleBodyTemplate annotationState into a savable IIIF annotation: default an
+ * empty maeData.textBody.value, build the saved `body` array from textBody + tags
+ * (applyMultipleBodyConversion, shared with convertAnnotationStateToBeSaved's fallback path so
+ * the two can't silently diverge), then finalize the spatial target.
+ * @param {object} state
+ * @param {{ canvas: object, windowId: string, playerReferences: object }} ctx
+ * @returns {Promise<object>}
+ */
+export const convertMultipleBodyAnnotationToBeSaved = async (
+  state,
+  { canvas, windowId, playerReferences },
+) => {
+  const stateToSave = applyMultipleBodyConversion(state);
+  return finalizeSpatialTarget(stateToSave, canvas, windowId, playerReferences);
+};
 
 /** Tagging Template* */
 export default function MultipleBodyTemplate(

@@ -2,7 +2,18 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Paper } from '@mui/material';
 import { JsonEditor } from 'json-edit-react';
-import AnnotationFormFooter from './AnnotationFormFooter';
+import { templateKit } from './templateKit';
+
+const { AnnotationFormFooter } = templateKit;
+
+/**
+ * Convert an IIIFTemplate annotationState into a savable IIIF annotation. IIIF_TYPE
+ * ("expert mode") annotations are a raw, hand-edited IIIF annotation via the JSON editor
+ * below - there is nothing to convert.
+ * @param {object} state
+ * @returns {Promise<object>}
+ */
+export const convertIIIFAnnotationToBeSaved = async (state) => state;
 
 /**
  * IIIFTemplate component

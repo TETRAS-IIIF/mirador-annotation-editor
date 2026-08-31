@@ -5,8 +5,11 @@ import {
     Card, CardActionArea, CardContent, Grid,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { getConfig } from 'mirador';
 import PropTypes from 'prop-types';
-import { MEDIA_TYPES, TEMPLATE_TYPES } from './AnnotationFormUtils';
+import { MEDIA_TYPES } from './AnnotationFormUtils';
+import { TEMPLATE_TYPES } from './templateRegistry';
 
 /**
  * A component that renders a selection of annotation
@@ -18,7 +21,8 @@ export default function AnnotationFormTemplateSelector({
                                                        }) {
     const { t } = useTranslation();
     const setCommentType = (template) => setCommentingType(template);
-    const templates = TEMPLATE_TYPES(t);
+    const { externalTemplates } = useSelector((state) => getConfig(state)).annotation;
+    const templates = TEMPLATE_TYPES(t, externalTemplates);
 
     return (
         <CardContainer>
@@ -30,7 +34,7 @@ export default function AnnotationFormTemplateSelector({
                 </Grid>
             ) : (
                 templates.map((template) => (
-                    template.isCompatibleWithTemplate(mediaType) && (
+                    template.isCompatibleWithMediaType(mediaType) && (
                         <MaeCard key={template.id}>
                             <MaeActionArea id={template.id} onClick={() => setCommentType(template)}>
                                 <CardContent>
