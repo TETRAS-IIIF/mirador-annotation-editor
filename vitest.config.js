@@ -36,6 +36,11 @@ export default defineConfig({
       all: true,
       enabled: true,
     },
+    env: {
+      // Node's native --experimental-webstorage global shadows happy-dom's
+      // window.localStorage, leaving `localStorage` undefined in tests.
+      NODE_OPTIONS: '--no-experimental-webstorage',
+    },
     environment: 'happy-dom',
     exclude: ['node_modules'],
     globals: true,
