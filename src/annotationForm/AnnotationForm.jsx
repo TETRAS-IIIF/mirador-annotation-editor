@@ -5,11 +5,11 @@ import { ConnectedCompanionWindow } from 'mirador';
 import PropTypes from 'prop-types';
 import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
 import AnnotationFormTemplateSelector from './AnnotationFormTemplateSelector';
 import {
-  getTemplateType, saveAnnotationInStorageAdapter, TEMPLATE, DEFAULT_FORM_MAP,
+  saveAnnotationInStorageAdapter, TEMPLATE, DEFAULT_FORM_MAP,
 } from './AnnotationFormUtils';
+import { getTemplateType } from './templateRegistry';
 import { getContextParams } from '../contextParams';
 import AnnotationFormHeader from './AnnotationFormHeader';
 import AnnotationFormBody from './AnnotationFormBody';
@@ -158,11 +158,10 @@ function AnnotationForm(
       .map(async (canvas) => {
         let annotationStateToBeSaved;
         if (annotationProps?.maeData && annotationProps.maeData.templateType) {
-          annotationStateToBeSaved = await convertAnnotationStateToBeSaved(
+          const { convertToAnnotation } = getTemplateType(t, annotationProps.maeData.templateType);
+          annotationStateToBeSaved = await convertToAnnotation(
             annotationProps,
-            canvas,
-            windowId,
-            playerReferences,
+            { canvas, playerReferences, windowId },
           );
         } else {
           annotationStateToBeSaved = annotationProps;

@@ -5,13 +5,9 @@ import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { getConfig } from 'mirador';
-import TextCommentTemplate from './TextCommentTemplate';
 import './debug.css';
-import TaggingTemplate from './TaggingTemplate';
-import IIIFTemplate from './IIIFTemplate';
-import MultipleBodyTemplate from './MultipleBodyTemplate';
 import { DebugInformation } from './DebugInformation';
-import { TEMPLATE } from './AnnotationFormUtils';
+import { TEMPLATE_REGISTRY } from './templateRegistry';
 
 /**
  * This function contain the logic for loading annotation and render proper template type
@@ -30,55 +26,23 @@ export default function AnnotationFormBody(
   const { t } = useTranslation();
 
   const debugMode = useSelector((state) => getConfig(state)).annotation.debug ?? false;
+  const registryEntry = TEMPLATE_REGISTRY(t).find((entry) => entry.id === templateType.id);
+  const TemplateComponent = registryEntry?.Component;
+
   return (
     <Grid container direction="column">
 
       <TemplateContainer>
         {
-          templateType.id === TEMPLATE.TEXT_TYPE && (
-            <TextCommentTemplate
-              annotation={annotation}
-              closeFormCompanionWindow={closeFormCompanionWindow}
-              playerReferences={playerReferences}
-              saveAnnotation={saveAnnotation}
-              t={t}
-              windowId={windowId}
-            />
-          )
-        }
-        {
-          templateType.id === TEMPLATE.MULTIPLE_BODY_TYPE && (
-            <MultipleBodyTemplate
-              annotation={annotation}
-              closeFormCompanionWindow={closeFormCompanionWindow}
-              playerReferences={playerReferences}
-              saveAnnotation={saveAnnotation}
-              t={t}
-              windowId={windowId}
-            />
-          )
-        }
-        {
-          templateType.id === TEMPLATE.TAGGING_TYPE && (
-            <TaggingTemplate
-              annotation={annotation}
-              closeFormCompanionWindow={closeFormCompanionWindow}
-              playerReferences={playerReferences}
-              saveAnnotation={saveAnnotation}
-              t={t}
-              windowId={windowId}
-            />
-          )
-        }
-        {
-          templateType.id === TEMPLATE.IIIF_TYPE && (
-            <IIIFTemplate
+          TemplateComponent && (
+            <TemplateComponent
               annotation={annotation}
               canvases={canvases}
               closeFormCompanionWindow={closeFormCompanionWindow}
               playerReferences={playerReferences}
               saveAnnotation={saveAnnotation}
               t={t}
+              windowId={windowId}
             />
           )
         }

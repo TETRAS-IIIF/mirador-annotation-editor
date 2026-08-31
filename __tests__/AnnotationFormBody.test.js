@@ -3,11 +3,12 @@ import { I18nextProvider } from 'react-i18next';
 import { i18n } from '../setupTest';
 import { render, screen } from './test-utils';
 import AnnotationFormBody from '../src/annotationForm/AnnotationFormBody';
-import { TEMPLATE, getTemplateType } from '../src/annotationForm/AnnotationFormUtils';
+import { TEMPLATE } from '../src/annotationForm/AnnotationFormUtils';
+import { getTemplateType, TEMPLATE_TYPES } from '../src/annotationForm/templateRegistry';
 
 // Dispatch tests for issue #12 (https://github.com/Tetras-dfb/root_repo/issues/12): AnnotationFormBody
-// is the single hardcoded if-chain that decides which template component to render for a given
-// templateType.id. These tests pin that dispatch behavior down before any registry-based refactor.
+// renders whichever template component the registry (templateRegistry.jsx, Phase 1) maps a given
+// templateType.id to. These tests pin down that dispatch behavior.
 
 vi.mock('../src/annotationForm/TextCommentTemplate', () => ({ default: () => <div data-testid="TextCommentTemplate" /> }));
 vi.mock('../src/annotationForm/TaggingTemplate', () => ({ default: () => <div data-testid="TaggingTemplate" /> }));
@@ -73,18 +74,31 @@ describe('getTemplateType', () => {
   /** Identity translation stub */
   const mockT = (key) => key;
 
-  it.each([TEMPLATE.MULTIPLE_BODY_TYPE, TEMPLATE.TAGGING_TYPE, TEMPLATE.IIIF_TYPE])(
-    'resolves the %s entry from TEMPLATE_TYPES by id',
+  it.each([
+    TEMPLATE.MULTIPLE_BODY_TYPE, TEMPLATE.TAGGING_TYPE, TEMPLATE.IIIF_TYPE, TEMPLATE.TEXT_TYPE,
+  ])(
+    'resolves the %s entry from the registry by id, for dispatch purposes',
     (templateType) => {
       expect(getTemplateType(mockT, templateType)?.id).toBe(templateType);
     },
   );
 
-  it('is not registered for TEXT_TYPE: the legacy template is only reachable by loading existing data, never selectable', () => {
-    expect(getTemplateType(mockT, TEMPLATE.TEXT_TYPE)).toBeUndefined();
-  });
-
   it('returns undefined for an unknown templateType id', () => {
     expect(getTemplateType(mockT, 'some-unknown-type')).toBeUndefined();
+  });
+});
+
+describe('TEMPLATE_TYPES (the template picker list)', () => {
+  /** Identity translation stub */
+  const mockT = (key) => key;
+
+  it('does not offer TEXT_TYPE: the legacy template is only reachable by loading existing data, never selectable', () => {
+    expect(TEMPLATE_TYPES(mockT).map((entry) => entry.id)).not.toContain(TEMPLATE.TEXT_TYPE);
+  });
+
+  it('offers the 3 user-selectable templates', () => {
+    expect(TEMPLATE_TYPES(mockT).map((entry) => entry.id).sort()).toEqual(
+      [TEMPLATE.MULTIPLE_BODY_TYPE, TEMPLATE.TAGGING_TYPE, TEMPLATE.IIIF_TYPE].sort(),
+    );
   });
 });

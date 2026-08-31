@@ -6,7 +6,8 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
-import { MEDIA_TYPES, TEMPLATE_TYPES } from './AnnotationFormUtils';
+import { MEDIA_TYPES } from './AnnotationFormUtils';
+import { TEMPLATE_TYPES } from './templateRegistry';
 
 /**
  * A component that renders a selection of annotation
@@ -30,7 +31,7 @@ export default function AnnotationFormTemplateSelector({
                 </Grid>
             ) : (
                 templates.map((template) => (
-                    template.isCompatibleWithTemplate(mediaType) && (
+                    template.isCompatibleWithMediaType(mediaType) && (
                         <MaeCard key={template.id}>
                             <MaeActionArea id={template.id} onClick={() => setCommentType(template)}>
                                 <CardContent>
