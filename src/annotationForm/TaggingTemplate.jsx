@@ -4,12 +4,13 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { getConfig } from 'mirador';
-import AnnotationFormFooter from './AnnotationFormFooter';
 import { TEMPLATE } from './AnnotationFormUtils';
-import TargetFormSection from './TargetFormSection';
 import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
 import { getContextParams } from '../contextParams';
 import { convertSingleBodyAnnotationToBeSaved } from '../IIIFUtils';
+import { templateKit } from './templateKit';
+
+const { AnnotationFormFooter, TargetFormSection } = templateKit;
 
 /**
  * Convert a TaggingTemplate annotationState into a savable IIIF annotation. Tagging has no

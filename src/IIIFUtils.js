@@ -538,6 +538,33 @@ export const convertSingleBodyAnnotationToBeSaved = async (
 };
 
 /**
+ * Shared MULTIPLE_BODY_TYPE-specific step: default an empty maeData.textBody.value, then build
+ * the saved `body` array from textBody + tags. Used by both
+ * convertMultipleBodyAnnotationToBeSaved (MultipleBodyTemplate.jsx, the real path) and
+ * convertAnnotationStateToBeSaved's own MULTIPLE_BODY_TYPE branch below (AnnotationForm.jsx's
+ * fallback for an unrecognized templateType) so the two can't silently diverge.
+ * @param {object} state
+ * @returns {object} the same state, mutated
+ */
+export const applyMultipleBodyConversion = (state) => {
+  const stateToSave = state;
+  if (
+    stateToSave.maeData?.textBody
+      && isEmptyValue(stateToSave.maeData.textBody.value)
+  ) {
+    stateToSave.maeData.textBody.value = getDefaultValue();
+  }
+  stateToSave.body = [stateToSave.maeData.textBody];
+  stateToSave.body.push(...stateToSave.maeData.tags.map((tag) => ({
+    id: tag.value,
+    purpose: 'tagging',
+    type: 'TextualBody',
+    value: tag.value,
+  })));
+  return stateToSave;
+};
+
+/**
  * Convert annotation state to be saved. Function change the annotationState object
  *
  * NOTE: as of Phase 2d of the per-template conversion-logic migration described in
@@ -575,21 +602,13 @@ export const convertAnnotationStateToBeSaved = async (
     annotationStateForSaving.body.value = getDefaultValue();
   }
 
-  if (
+  if (annotationStateForSaving.maeData.templateType === TEMPLATE.MULTIPLE_BODY_TYPE) {
+    applyMultipleBodyConversion(annotationStateForSaving);
+  } else if (
     annotationStateForSaving.maeData?.textBody
       && isEmptyValue(annotationStateForSaving.maeData.textBody.value)
   ) {
     annotationStateForSaving.maeData.textBody.value = getDefaultValue();
-  }
-
-  if (annotationStateForSaving.maeData.templateType === TEMPLATE.MULTIPLE_BODY_TYPE) {
-    annotationStateForSaving.body = [annotationState.maeData.textBody];
-    annotationStateForSaving.body.push(...annotationState.maeData.tags.map((tag) => ({
-      id: tag.value,
-      purpose: 'tagging',
-      type: 'TextualBody',
-      value: tag.value,
-    })));
   }
 
   return finalizeSpatialTarget(annotationStateForSaving, canvas, windowId, playerReferences);
