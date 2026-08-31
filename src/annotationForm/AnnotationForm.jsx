@@ -34,7 +34,7 @@ function AnnotationForm(
 ) {
   const { t } = useTranslation();
   // TEMPLATE_REGISTRY (via getTemplateType) already defaults this to [] on its own if undefined.
-  const externalTemplates = config.annotation.templates;
+  const { externalTemplates } = config.annotation;
   const [templateType, setTemplateType] = useState(null);
   // eslint-disable-next-line no-underscore-dangle
   const [mediaType, setMediaType] = useState(playerReferences.getMediaType());
@@ -270,7 +270,7 @@ AnnotationForm.propTypes = {
         PropTypes.oneOfType([PropTypes.bool, PropTypes.func, PropTypes.number, PropTypes.string]),
       ),
       // eslint-disable-next-line react/forbid-prop-types
-      templates: PropTypes.arrayOf(PropTypes.object),
+      externalTemplates: PropTypes.arrayOf(PropTypes.object),
     }),
     language: PropTypes.string,
     // eslint-disable-next-line react/forbid-prop-types

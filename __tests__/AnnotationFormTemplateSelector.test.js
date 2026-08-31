@@ -67,7 +67,7 @@ describe('AnnotationFormTemplateSelector', () => {
         preloadedState: {
           config: {
             annotation: {
-              templates: [{
+              externalTemplates: [{
                 Component: () => null,
                 convertToAnnotation: vi.fn(),
                 description: 'An externally-registered template',

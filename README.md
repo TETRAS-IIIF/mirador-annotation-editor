@@ -36,7 +36,7 @@ lot of technical and functional modifications (including migration from PaperJS 
     * [Use MAE with video annotation support](#use-mae-with-video-annotation-support)
     * [Persisting Annotations](#persisting-annotations)
     * [Configuration](#configuration-)
-    * [External templates](#external-templates)
+    * [External annotation templates](#external-annotation-templates)
   * [Technical aspects from the original plugin](#technical-aspects-from-the-original-plugin)
   * [Contribute](#contribute)
     * [Contributor](#contributor)
@@ -124,17 +124,22 @@ See `demo/src/index.js` for a full configuration sample.
     quillConfig, // Configuration for the quill editor
     readonly: false, // If true, no annotation creation, edit, deleting is allowed
     tagsSuggestions: ['Mirador', 'Awesome', 'Viewer', 'IIIF', 'Template'], // Tags suggestions for autocompletion
-    templates: [], // Externally-registered annotation templates - see "External templates" below
+    externalTemplates: [], // Externally-registered annotation templates - see "External annotation templates" below
 };
 ```
 
-### External templates
+### External annotation templates
 
-MAE's built-in annotation templates (Note, Tag, expert JSON mode) are entries in an internal
-template registry. As of the template-registry migration
+**Not to be confused with `commentTemplates` above**, which are pre-filled text snippets for a
+note/tag's text field. This section is about registering a whole new *annotation type* - a new
+UI and a new way of saving what the user creates, alongside the built-in Note, Tag, and expert
+JSON mode.
+
+MAE's built-in annotation templates are entries in an internal template registry. As of the
+template-registry migration
 ([tetras-dfb/root_repo#12](https://github.com/Tetras-dfb/root_repo/issues/12)), you can register
-your own template alongside them via `config.annotation.templates`: an array of entries following
-the same contract as a built-in one.
+your own annotation template alongside them via `config.annotation.externalTemplates`: an array
+of entries following the same contract as a built-in one.
 
 ```js
 import { templateKit } from 'mirador-annotation-editor';
@@ -163,7 +168,7 @@ const myTemplate = {
 
 let annotationConfig = {
   // ... your other options ...
-  templates: [myTemplate],
+  externalTemplates: [myTemplate],
 };
 ```
 

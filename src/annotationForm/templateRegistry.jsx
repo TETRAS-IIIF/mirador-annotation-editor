@@ -37,12 +37,12 @@ const imageOnly = (mediaType) => mediaType === MEDIA_TYPES.IMAGE;
  *   ctx is `{ canvas, windowId, playerReferences }`
  *
  * Phase 5 (tetras-dfb/root_repo#12): open for external registration via
- * `config.annotation.templates`, an array of entries following this same contract - see the
+ * `config.annotation.externalTemplates`, an array of entries following this same contract - see the
  * README's "External templates" section and src/examples/exampleExternalTemplate.jsx for a
  * complete, tested example. An external entry whose id collides with a built-in TEMPLATE.*
  * constant is dropped (with a console.warn) rather than silently overriding it.
  * @param {Function} t - i18next translation function
- * @param {object[]} externalTemplates - entries from config.annotation.templates, if any
+ * @param {object[]} externalTemplates - entries from config.annotation.externalTemplates, if any
  * @returns {object[]}
  */
 export const TEMPLATE_REGISTRY = (t, externalTemplates = []) => {

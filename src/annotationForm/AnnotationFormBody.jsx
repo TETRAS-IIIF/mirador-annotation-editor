@@ -30,7 +30,7 @@ export default function AnnotationFormBody(
   // Not defaulted to [] here: TEMPLATE_REGISTRY already defaults externalTemplates to [] on its
   // own, and passing `undefined` through (rather than a fresh [] on every render) keeps this
   // dependency stable when no custom templates are configured, so useMemo below actually memoizes.
-  const externalTemplates = annotationConfig.templates;
+  const { externalTemplates } = annotationConfig;
   // Avoid rebuilding the registry (and its JSX icon elements) on every render just to look up
   // one entry by id.
   const TemplateComponent = useMemo(

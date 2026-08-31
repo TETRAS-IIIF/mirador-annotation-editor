@@ -7,8 +7,8 @@ const { AnnotationFormFooter } = templateKit;
 
 /**
  * Example third-party annotation template (tetras-dfb/root_repo#12, Phase 5): living
- * documentation of the config.annotation.templates extension point. See the README's
- * "External templates" section for how to register this (or your own) via config.
+ * documentation of the config.annotation.externalTemplates extension point. See the README's
+ * "External annotation templates" section for how to register this (or your own) via config.
  *
  * Deliberately minimal: a 1-5 star rating attached to the whole canvas, no spatial target, no
  * tags - showing what the extension point actually requires, not a full-featured template.
@@ -82,7 +82,7 @@ export const convertExampleRatingAnnotationToBeSaved = async (state, { canvas })
 
 /**
  * The registry-entry-shaped descriptor for this example template: spread it (or your own
- * equivalent) into config.annotation.templates to register it. See templateRegistry.jsx's
+ * equivalent) into config.annotation.externalTemplates to register it. See templateRegistry.jsx's
  * TEMPLATE_REGISTRY JSDoc for the full contract every entry (built-in or external) follows.
  */
 export const exampleExternalTemplate = {

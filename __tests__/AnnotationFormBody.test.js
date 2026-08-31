@@ -101,7 +101,7 @@ describe('AnnotationFormBody dispatch', () => {
           config: {
             annotation: {
               adapter: vi.fn(),
-              templates: [{
+              externalTemplates: [{
                 Component: () => <div data-testid="ExternalTemplate" />,
                 convertToAnnotation: vi.fn(),
                 description: '',
