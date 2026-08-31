@@ -361,29 +361,86 @@ describe('convertIIIFAnnoToMaeData', () => {
     expect(result.maeData.target.svg).toContain('<svg');
   });
 
-  it('rebuilds maeData.target from an SvgSelector, extracting the bounding box', () => {
+  describe('with a stubbed SVGGraphicsElement.getBBox', () => {
     // happy-dom's SVGGraphicsElement.getBBox is a stub that always returns a zero rect:
     // override it so the (real-browser-only) bbox extraction path is exercised deterministically.
-    const originalGetBBox = SVGGraphicsElement.prototype.getBBox;
-    SVGGraphicsElement.prototype.getBBox = vi.fn().mockReturnValue({
-      height: 40, width: 30, x: 5, y: 6,
+    // Scoped to beforeEach/afterEach (rather than saved/restored inline) so the global prototype
+    // is never left patched if an assertion throws mid-test.
+    let originalGetBBox;
+
+    beforeEach(() => {
+      originalGetBBox = SVGGraphicsElement.prototype.getBBox;
+      SVGGraphicsElement.prototype.getBBox = vi.fn().mockReturnValue({
+        height: 40, width: 30, x: 5, y: 6,
+      });
     });
-    const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><path fill='red' stroke='blue' d='M0 0'/></svg>";
-    const anno = {
-      bodyValue: 'x',
-      id: 'anno1',
-      target: { selector: { type: 'SvgSelector', value: svg } },
-    };
 
-    const result = convertIIIFAnnoToMaeData(anno);
-    const drawingState = JSON.parse(result.maeData.target.drawingState);
-
-    expect(drawingState.shapes[0]).toMatchObject({
-      fill: 'red', height: 40, stroke: 'blue', width: 30, x: 5, y: 6,
+    afterEach(() => {
+      SVGGraphicsElement.prototype.getBBox = originalGetBBox;
     });
-    expect(result.maeData.target.fullCanvaXYWH).toBe('0,0,800,600');
 
-    SVGGraphicsElement.prototype.getBBox = originalGetBBox;
+    it('rebuilds maeData.target from an SvgSelector, extracting the bounding box', () => {
+      const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><path fill='red' stroke='blue' d='M0 0'/></svg>";
+      const anno = {
+        bodyValue: 'x',
+        id: 'anno1',
+        target: { selector: { type: 'SvgSelector', value: svg } },
+      };
+
+      const result = convertIIIFAnnoToMaeData(anno);
+      const drawingState = JSON.parse(result.maeData.target.drawingState);
+
+      expect(drawingState.shapes[0]).toMatchObject({
+        fill: 'red', height: 40, stroke: 'blue', width: 30, x: 5, y: 6,
+      });
+      expect(result.maeData.target.fullCanvaXYWH).toBe('0,0,800,600');
+    });
+
+    it('falls back to returning `{}` for a non-XML/hostile SvgSelector value', () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const anno = {
+        bodyValue: 'x',
+        id: 'anno1',
+        target: {
+          selector: {
+            type: 'SvgSelector',
+            value: 'not xml at all <script>alert(1)</script>',
+          },
+        },
+      };
+
+      const result = convertIIIFAnnoToMaeData(anno);
+
+      expect(result.maeData.target).toEqual({});
+      expect(consoleErrorSpy).toHaveBeenCalled();
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('also falls back to `{}` when well-formed XML has no <svg> root element (e.g. a bare <script> tag)', () => {
+      // NOTE: convertSvgSelectorToMae never checks that the parsed document is actually rooted
+      // in <svg> before calling querySelector('svg').getAttribute(...); with no matching element
+      // that throws a TypeError, which the caller's try/catch turns into the same graceful `{}`
+      // fallback as unparseable input. Documenting this because it's the mechanism (an
+      // accidental null-dereference, not deliberate validation) that currently keeps a
+      // non-<svg>-rooted payload from being processed - it is not itself a safety guarantee to
+      // rely on if this code is ever refactored.
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const anno = {
+        bodyValue: 'x',
+        id: 'anno1',
+        target: {
+          selector: { type: 'SvgSelector', value: '<script xmlns="http://www.w3.org/2000/svg">alert(1)</script>' },
+        },
+      };
+
+      const result = convertIIIFAnnoToMaeData(anno);
+
+      expect(result.maeData.target).toEqual({});
+      expect(consoleErrorSpy).toHaveBeenCalled();
+
+      consoleErrorSpy.mockRestore();
+    });
   });
 
   it('logs an error and returns `{}` for maeData.target when no selector type is supported', () => {

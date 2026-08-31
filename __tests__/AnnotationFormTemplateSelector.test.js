@@ -52,7 +52,7 @@ describe('AnnotationFormTemplateSelector', () => {
     const setCommentingType = vi.fn();
     renderSelector(MEDIA_TYPES.IMAGE, setCommentingType);
 
-    screen.getByText('note').closest('[id]').click();
+    screen.getByRole('button', { name: /note/i }).click();
 
     expect(setCommentingType).toHaveBeenCalledWith(expect.objectContaining({ id: 'multiple_body', label: 'note' }));
   });
