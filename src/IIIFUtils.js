@@ -452,13 +452,20 @@ export const isEmptyValue = (value) => {
  */
 export const getDefaultValue = () => `${new Date().toLocaleString()}`;
 
+/** templateTypes with a Konva-drawn spatial target, i.e. every template except IIIF_TYPE */
+const SPATIAL_TARGET_TEMPLATE_TYPES = [
+  TEMPLATE.TAGGING_TYPE, TEMPLATE.TEXT_TYPE, TEMPLATE.MULTIPLE_BODY_TYPE,
+];
+
 /**
  * Shared, template-agnostic tail end of "convert annotationState to be saved": strips
- * maeData.target down to its known keys, captures an SVG snapshot of any drawn shapes,
- * computes the target's scale, derives the saved `target` (a xywh string or an SVG/Fragment
- * selector), and stringifies drawingState for storage. Every template with a spatial target
- * (i.e. every template except IIIF_TYPE, which returns its annotationState unchanged before
- * reaching this point) shares this exact pipeline - only what happens to `.body`/`.maeData.tags`
+ * maeData.target down to its known keys, captures an SVG snapshot of any drawn shapes (for a
+ * known spatial-target templateType only - see SPATIAL_TARGET_TEMPLATE_TYPES; this matters
+ * because convertAnnotationStateToBeSaved can also reach here as AnnotationForm.jsx's fallback
+ * for a templateType the registry doesn't recognize, and that isn't necessarily a Konva-shaped
+ * drawingState), computes the target's scale, derives the saved `target` (a xywh string or an
+ * SVG/Fragment selector), and stringifies drawingState for storage. Every template with a
+ * spatial target shares this exact pipeline - only what happens to `.body`/`.maeData.tags`
  * before calling this is template-specific.
  * @param {object} annotationState
  * @param {object} canvas
@@ -485,7 +492,10 @@ export const finalizeSpatialTarget = async (
 
   console.info('Annotation state target', annotationStateForSaving.maeData.target);
 
-  if (annotationStateForSaving.maeData.target.drawingState.shapes.length > 0) {
+  if (
+    SPATIAL_TARGET_TEMPLATE_TYPES.includes(annotationStateForSaving.maeData.templateType)
+      && annotationStateForSaving.maeData.target.drawingState.shapes.length > 0
+  ) {
     annotationStateForSaving.maeData.target.svg = await getSvg(windowId);
   }
 

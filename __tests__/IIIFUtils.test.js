@@ -286,6 +286,29 @@ describe('convertAnnotationStateToBeSaved', () => {
     expect(result.maeData.target.scale).toBe(2);
     expect(result.target).toBe('canvas1#xywh=10,20,30,40');
   });
+
+  it('does not capture an SVG snapshot for an unrecognized templateType, even with shapes present', async () => {
+    // Characterizes AnnotationForm.jsx's fallback path (a templateType the registry doesn't
+    // recognize): finalizeSpatialTarget only captures an SVG for the known spatial-target
+    // templateTypes, since a genuinely unrecognized type's drawingState isn't necessarily
+    // Konva-shaped.
+    const annotationState = baseAnnotationState('some-unknown-type');
+    annotationState.maeData.target.drawingState.shapes = [simpleRectangleShape()];
+    const getSvgMock = vi.mocked(
+      (await import('../src/annotationForm/AnnotationFormOverlay/KonvaDrawing/KonvaUtils')).getSvg,
+    );
+    getSvgMock.mockClear();
+
+    const result = await convertAnnotationStateToBeSaved(
+      annotationState,
+      { id: 'canvas1' },
+      'window1',
+      playerReferences,
+    );
+
+    expect(getSvgMock).not.toHaveBeenCalled();
+    expect(result.maeData.target.svg).toBeUndefined();
+  });
 });
 
 describe('convertIIIFAnnoToMaeData', () => {
