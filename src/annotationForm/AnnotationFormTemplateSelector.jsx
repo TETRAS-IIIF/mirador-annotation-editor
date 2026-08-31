@@ -5,6 +5,8 @@ import {
     Card, CardActionArea, CardContent, Grid,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { getConfig } from 'mirador';
 import PropTypes from 'prop-types';
 import { MEDIA_TYPES } from './AnnotationFormUtils';
 import { TEMPLATE_TYPES } from './templateRegistry';
@@ -19,7 +21,8 @@ export default function AnnotationFormTemplateSelector({
                                                        }) {
     const { t } = useTranslation();
     const setCommentType = (template) => setCommentingType(template);
-    const templates = TEMPLATE_TYPES(t);
+    const externalTemplates = useSelector((state) => getConfig(state)).annotation.templates;
+    const templates = TEMPLATE_TYPES(t, externalTemplates);
 
     return (
         <CardContainer>

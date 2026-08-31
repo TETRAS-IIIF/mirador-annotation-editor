@@ -25,12 +25,19 @@ export default function AnnotationFormBody(
 ) {
   const { t } = useTranslation();
 
-  const debugMode = useSelector((state) => getConfig(state)).annotation.debug ?? false;
+  const annotationConfig = useSelector((state) => getConfig(state)).annotation;
+  const debugMode = annotationConfig.debug ?? false;
+  // Not defaulted to [] here: TEMPLATE_REGISTRY already defaults externalTemplates to [] on its
+  // own, and passing `undefined` through (rather than a fresh [] on every render) keeps this
+  // dependency stable when no custom templates are configured, so useMemo below actually memoizes.
+  const externalTemplates = annotationConfig.templates;
   // Avoid rebuilding the registry (and its JSX icon elements) on every render just to look up
   // one entry by id.
   const TemplateComponent = useMemo(
-    () => TEMPLATE_REGISTRY(t).find((entry) => entry.id === templateType.id)?.Component,
-    [t, templateType.id],
+    () => TEMPLATE_REGISTRY(t, externalTemplates).find(
+      (entry) => entry.id === templateType.id,
+    )?.Component,
+    [t, templateType.id, externalTemplates],
   );
 
   return (
