@@ -159,6 +159,11 @@ function AnnotationForm(
    */
   const saveAnnotation = (annotationState) => {
     const annotationProps = annotationState;
+    // Looked up once (not per-canvas below): templateType doesn't vary across canvases, and
+    // getTemplateType rebuilds the whole registry (icons included) on every call.
+    const registryEntry = annotationProps?.maeData?.templateType
+      ? getTemplateType(t, annotationProps.maeData.templateType)
+      : undefined;
 
     const promises = playerReferences.getCanvases()
       .map(async (canvas) => {
@@ -166,7 +171,6 @@ function AnnotationForm(
         if (annotationProps?.maeData && annotationProps.maeData.templateType) {
           // Fall back to the shared converter directly for a templateType the registry
           // doesn't know about (e.g. legacy/externally-sourced data), instead of throwing.
-          const registryEntry = getTemplateType(t, annotationProps.maeData.templateType);
           annotationStateToBeSaved = registryEntry
             ? await registryEntry.convertToAnnotation(
               annotationProps,

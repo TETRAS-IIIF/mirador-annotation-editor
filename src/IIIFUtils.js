@@ -514,6 +514,30 @@ export const finalizeSpatialTarget = async (
 };
 
 /**
+ * Shared conversion for templates whose annotationState carries a single `body` object with
+ * no tags array or maeData.textBody - TaggingTemplate and TextCommentTemplate have the exact
+ * same shape, so both re-export this rather than duplicating it: default an empty body.value,
+ * then finalize the spatial target.
+ * @param {object} state
+ * @param {{ canvas: object, windowId: string, playerReferences: object }} ctx
+ * @returns {Promise<object>}
+ */
+export const convertSingleBodyAnnotationToBeSaved = async (
+  state,
+  { canvas, windowId, playerReferences },
+) => {
+  const stateToSave = state;
+  if (
+    stateToSave.body
+      && !Array.isArray(stateToSave.body)
+      && isEmptyValue(stateToSave.body.value)
+  ) {
+    stateToSave.body.value = getDefaultValue();
+  }
+  return finalizeSpatialTarget(stateToSave, canvas, windowId, playerReferences);
+};
+
+/**
  * Convert annotation state to be saved. Function change the annotationState object
  *
  * NOTE: handles MULTIPLE_BODY_TYPE only now. TAGGING_TYPE and TEXT_TYPE have their own

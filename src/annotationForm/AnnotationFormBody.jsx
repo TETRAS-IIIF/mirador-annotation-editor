@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 import { Grid } from '@mui/material';
@@ -26,8 +26,12 @@ export default function AnnotationFormBody(
   const { t } = useTranslation();
 
   const debugMode = useSelector((state) => getConfig(state)).annotation.debug ?? false;
-  const registryEntry = TEMPLATE_REGISTRY(t).find((entry) => entry.id === templateType.id);
-  const TemplateComponent = registryEntry?.Component;
+  // Avoid rebuilding the registry (and its JSX icon elements) on every render just to look up
+  // one entry by id.
+  const TemplateComponent = useMemo(
+    () => TEMPLATE_REGISTRY(t).find((entry) => entry.id === templateType.id)?.Component,
+    [t, templateType.id],
+  );
 
   return (
     <Grid container direction="column">
