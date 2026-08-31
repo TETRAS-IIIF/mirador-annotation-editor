@@ -197,6 +197,18 @@ describe('TEMPLATE_REGISTRY external registration (Phase 5, issue #12)', () => {
     consoleWarnSpy.mockRestore();
   });
 
+  it('drops (and warns about) a malformed external template instead of crashing the whole registry', () => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const malformed = { ...externalTemplate(), isCompatibleWithMediaType: undefined };
+
+    const entries = TEMPLATE_REGISTRY(mockT, [malformed]);
+
+    expect(entries.map((entry) => entry.id)).not.toContain('my-plugin/custom-template');
+    expect(consoleWarnSpy).toHaveBeenCalled();
+
+    consoleWarnSpy.mockRestore();
+  });
+
   it('defaults to no external templates when none are passed', () => {
     expect(TEMPLATE_REGISTRY(mockT)).toHaveLength(4);
   });

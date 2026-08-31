@@ -100,6 +100,22 @@ export const TEMPLATE_REGISTRY = (t, externalTemplates = []) => {
       );
       return false;
     }
+    // A malformed entry (e.g. isCompatibleWithMediaType missing) would otherwise throw inside
+    // AnnotationFormTemplateSelector's render, breaking the picker for every template - not
+    // just this one. Drop it instead, with enough detail to fix the registration.
+    if (
+      typeof entry.id !== 'string'
+        || typeof entry.Component !== 'function'
+        || typeof entry.convertToAnnotation !== 'function'
+        || typeof entry.isCompatibleWithMediaType !== 'function'
+    ) {
+      console.warn(
+        `Ignoring external annotation template with id "${entry.id}": it does not follow the `
+          + 'TEMPLATE_REGISTRY contract (id: string, Component/convertToAnnotation/'
+          + 'isCompatibleWithMediaType: function are all required).',
+      );
+      return false;
+    }
     return true;
   });
 
