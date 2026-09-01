@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { getConfig } from 'mirador';
 import PropTypes from 'prop-types';
-import { MEDIA_TYPES } from './AnnotationFormUtils';
-import { TEMPLATE_TYPES } from './templateRegistry';
+import { MEDIA_TYPES } from '../AnnotationFormUtils';
+import { TEMPLATE_TYPES } from './registry';
 
 /**
  * A component that renders a selection of annotation

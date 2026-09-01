@@ -1,4 +1,4 @@
-import { templateKit } from '../src/annotationForm/templateKit';
+import { templateKit } from '../src/annotationForm/templates/kit';
 import AnnotationFormFooter from '../src/annotationForm/AnnotationFormFooter';
 import TargetFormSection from '../src/annotationForm/TargetFormSection';
 import TextFormSection from '../src/annotationForm/TextFormSection';

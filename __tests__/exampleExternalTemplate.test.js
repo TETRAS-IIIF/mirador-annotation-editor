@@ -6,8 +6,8 @@ import {
   ExampleRatingTemplate,
   convertExampleRatingAnnotationToBeSaved,
   exampleExternalTemplate,
-} from '../src/examples/exampleExternalTemplate';
-import { TEMPLATE_REGISTRY } from '../src/annotationForm/templateRegistry';
+} from '../src/annotationForm/templates/examples/exampleExternalTemplate';
+import { TEMPLATE_REGISTRY } from '../src/annotationForm/templates/registry';
 
 // Living documentation for issue #12 Phase 5 (tetras-dfb/root_repo#12): proves the example
 // third-party template actually works end-to-end through the real extension point, not just

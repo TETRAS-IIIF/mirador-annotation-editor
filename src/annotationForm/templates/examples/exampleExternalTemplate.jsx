@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Grid, Rating, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
-import { templateKit } from '../annotationForm/templateKit';
+import { templateKit } from '../kit';
 
 const { AnnotationFormFooter } = templateKit;
 

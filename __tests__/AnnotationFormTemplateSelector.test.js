@@ -2,7 +2,7 @@ import React from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { i18n } from '../setupTest';
 import { render, screen } from './test-utils';
-import AnnotationFormTemplateSelector from '../src/annotationForm/AnnotationFormTemplateSelector';
+import AnnotationFormTemplateSelector from '../src/annotationForm/templates/AnnotationFormTemplateSelector';
 import { MEDIA_TYPES } from '../src/annotationForm/AnnotationFormUtils';
 
 // Selector tests for issue #12 (https://github.com/Tetras-dfb/root_repo/issues/12): pins down

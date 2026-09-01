@@ -172,9 +172,10 @@ let annotationConfig = {
 };
 ```
 
-See `src/examples/exampleExternalTemplate.jsx` for a complete, tested example (a minimal
-whole-canvas star-rating template) and `src/annotationForm/templateRegistry.jsx`'s
-`TEMPLATE_REGISTRY` JSDoc for the full contract reference.
+See `src/annotationForm/templates/examples/exampleExternalTemplate.jsx` for a complete, tested
+example (a minimal whole-canvas star-rating template) and
+`src/annotationForm/templates/registry.jsx`'s `TEMPLATE_REGISTRY` JSDoc for the full contract
+reference.
 
 ## Technical aspects from the original plugin
 

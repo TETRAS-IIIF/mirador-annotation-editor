@@ -6,11 +6,11 @@ import PropTypes from 'prop-types';
 import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
-import AnnotationFormTemplateSelector from './AnnotationFormTemplateSelector';
+import AnnotationFormTemplateSelector from './templates/AnnotationFormTemplateSelector';
 import {
   saveAnnotationInStorageAdapter, TEMPLATE, DEFAULT_FORM_MAP,
 } from './AnnotationFormUtils';
-import { getTemplateType } from './templateRegistry';
+import { getTemplateType } from './templates/registry';
 import { getContextParams } from '../contextParams';
 import AnnotationFormHeader from './AnnotationFormHeader';
 import AnnotationFormBody from './AnnotationFormBody';

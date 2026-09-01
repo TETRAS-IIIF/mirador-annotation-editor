@@ -1,4 +1,4 @@
-import { convertIIIFAnnotationToBeSaved } from '../src/annotationForm/IIIFTemplate';
+import { convertIIIFAnnotationToBeSaved } from '../src/annotationForm/templates/builtin/IIIFTemplate';
 
 // Regression test for issue #12 Phase 2c (tetras-dfb/root_repo#12): IIIF_TYPE ("expert mode")
 // annotations are already a raw, hand-edited IIIF annotation - convertAnnotationStateToBeSaved

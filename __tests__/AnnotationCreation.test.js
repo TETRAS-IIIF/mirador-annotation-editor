@@ -3,7 +3,7 @@ import React from 'react';
 import {
   fireEvent, render, screen, waitFor,
 } from './test-utils';
-import TextCommentTemplate from '../src/annotationForm/TextCommentTemplate';
+import TextCommentTemplate from '../src/annotationForm/templates/builtin/TextCommentTemplate';
 
 const container = document.createElement('div');
 container.setAttribute('data-testid', 'drawContainer');

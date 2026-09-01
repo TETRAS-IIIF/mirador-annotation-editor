@@ -6,7 +6,7 @@ import windowSideBarButtonsPlugin from './plugins/windowSideBarButtonsPlugin';
 import annotationSagaPlugin from './plugins/annotationSaga';
 import AiiinotateAdapter from './annotationAdapter/AiiinotateAdapter';
 import LocalStorageAdapter from './annotationAdapter/LocalStorageAdapter';
-import { templateKit } from './annotationForm/templateKit';
+import { templateKit } from './annotationForm/templates/kit';
 import 'react-quill/dist/quill.snow.css';
 
 export {
