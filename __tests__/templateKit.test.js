@@ -1,9 +1,9 @@
 import { templateKit } from '../src/annotationForm/templates/kit';
-import AnnotationFormFooter from '../src/annotationForm/AnnotationFormFooter';
-import TargetFormSection from '../src/annotationForm/TargetFormSection';
-import TextFormSection from '../src/annotationForm/TextFormSection';
-import { TextCommentInput } from '../src/annotationForm/TextCommentInput';
-import { MultiTagsInput } from '../src/annotationForm/MultiTagsInput';
+import AnnotationFormFooter from '../src/annotationForm/templates/templateComponents/AnnotationFormFooter';
+import TargetFormSection from '../src/annotationForm/templates/templateComponents/TargetFormSection';
+import TextFormSection from '../src/annotationForm/templates/templateComponents/TextFormSection';
+import { TextCommentInput } from '../src/annotationForm/templates/templateComponents/TextCommentInput';
+import { MultiTagsInput } from '../src/annotationForm/templates/templateComponents/MultiTagsInput';
 
 // Smoke test for issue #12 Phase 3 (tetras-dfb/root_repo#12): templateKit is the public,
 // documented building-block bundle both in-repo and future externally-registered templates

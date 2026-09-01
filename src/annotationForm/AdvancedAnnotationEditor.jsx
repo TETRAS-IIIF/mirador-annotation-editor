@@ -3,9 +3,11 @@ import { Grid } from '@mui/material';
 import ace from 'brace';
 import PropTypes from 'prop-types';
 import { JsonEditor } from 'json-edit-react';
-import AnnotationFormFooter from './AnnotationFormFooter';
+import AnnotationFormFooter from './templates/templateComponents/AnnotationFormFooter';
 
 // TODO reimport react editor
+
+// TODO is this still use somewhere ?
 
 
 /** Advanced Annotation Editor * */

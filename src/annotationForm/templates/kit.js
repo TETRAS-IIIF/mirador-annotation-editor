@@ -1,8 +1,8 @@
-import AnnotationFormFooter from '../AnnotationFormFooter';
-import TargetFormSection from '../TargetFormSection';
-import TextFormSection from '../TextFormSection';
-import { TextCommentInput } from '../TextCommentInput';
-import { MultiTagsInput } from '../MultiTagsInput';
+import AnnotationFormFooter from './templateComponents/AnnotationFormFooter';
+import TargetFormSection from './templateComponents/TargetFormSection';
+import TextFormSection from './templateComponents/TextFormSection';
+import { TextCommentInput } from './templateComponents/TextCommentInput';
+import { MultiTagsInput } from './templateComponents/MultiTagsInput';
 
 /**
  * The shared "template kit" (tetras-dfb/root_repo#12, Phase 3): the low-level building blocks

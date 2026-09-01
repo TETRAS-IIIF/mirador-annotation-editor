@@ -7,12 +7,12 @@ import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { getConfig } from 'mirador';
-import AnnotationDrawing from './AnnotationFormOverlay/AnnotationDrawing';
-import { TARGET_TOOL_STATE, TARGET_VIEW } from './AnnotationFormUtils';
-import { getContextParams } from '../contextParams';
-import AnnotationFormOverlay from './AnnotationFormOverlay/AnnotationFormOverlay';
-import { KONVA_MODE, OVERLAY_TOOL } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
-import { MAE_DELETE_SHAPE_EVENT } from '../hotkeys/hotkeysEvents';
+import AnnotationDrawing from '../../AnnotationFormOverlay/AnnotationDrawing';
+import { TARGET_TOOL_STATE, TARGET_VIEW } from '../../AnnotationFormUtils';
+import { getContextParams } from '../../../contextParams';
+import AnnotationFormOverlay from '../../AnnotationFormOverlay/AnnotationFormOverlay';
+import { KONVA_MODE, OVERLAY_TOOL } from '../../AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
+import { MAE_DELETE_SHAPE_EVENT } from '../../../hotkeys/hotkeysEvents';
 
 /**
  * TargetSpatialInput - Target spatial input component

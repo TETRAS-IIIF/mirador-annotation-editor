@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
-import TextEditor from '../TextEditor';
+import TextEditor from '../../../TextEditor';
 
 /**
  * TextAnnotation section

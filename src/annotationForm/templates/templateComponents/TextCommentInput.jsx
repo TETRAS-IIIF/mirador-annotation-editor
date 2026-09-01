@@ -14,7 +14,7 @@ import CreatableSelect from 'react-select/creatable';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getConfig } from 'mirador';
-import TextEditor from '../TextEditor';
+import TextEditor from '../../../TextEditor';
 
 /**
  * TextCommentInput component
