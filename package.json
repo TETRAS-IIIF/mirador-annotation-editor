@@ -34,6 +34,7 @@
   "scripts": {
     "prepack": "npm run build",
     "build": "vite build && npm run types:copy",
+    "build:watch": "vite build --watch",
     "types:copy": "mkdir -p dist && cp src/index.d.ts dist/index.d.ts",
     "clean": "rm -rf ./dist && rm -rf node_modules",
     "lint": "npx eslint ./",
