@@ -220,12 +220,4 @@ CanvasListItem.propTypes = {
   children: PropTypes.oneOfType([PropTypes.func, PropTypes.node]).isRequired,
 };
 
-// Not wrapped in withTranslation() (it already reads `t` via useTranslation()
-// above): that HOC only forwards refs when called as withTranslation({
-// withRef: true }), so with the default options here it silently dropped the
-// ref MUI's MenuItem passes down as this component's `component` prop -
-// menuItemRef.current stayed null, both breaking MenuList's autoFocusItem
-// ("MUI: Unable to set focus to a MenuItem whose component has not been
-// rendered") and leaking a `t` prop into the `{...props}` spread on the raw
-// <li> below ("Invalid value for prop `t` on <li> tag").
 export default CanvasListItem;
