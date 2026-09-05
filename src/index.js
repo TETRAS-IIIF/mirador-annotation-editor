@@ -7,6 +7,7 @@ import annotationSagaPlugin from './plugins/annotationSaga';
 import AiiinotateAdapter from './annotationAdapter/AiiinotateAdapter';
 import LocalStorageAdapter from './annotationAdapter/LocalStorageAdapter';
 import { templateKit } from './annotationForm/templates/kit';
+import { convertIIIFAnnoToMaeData } from './IIIFUtils';
 import 'react-quill/dist/quill.snow.css';
 
 export {
@@ -14,6 +15,7 @@ export {
   canvasAnnotationsPlugin, annotationCreationCompanionWindowPlugin,
   windowSideBarButtonsPlugin,
   templateKit,
+  convertIIIFAnnoToMaeData,
 };
 
 export const annotationAdapters = {
