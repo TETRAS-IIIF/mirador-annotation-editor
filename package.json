@@ -68,7 +68,6 @@
     "react-konva": "^19.2.3",
     "react-konva-to-svg": "^1.0.2",
     "react-quill": "npm:react-quill-new@3.8.3",
-    "react-redux": "^9.2.0",
     "react-refresh": "^0.14.0",
     "react-resize-observer": "^1.1.1",
     "react-select": "^5.10.1",
@@ -89,7 +88,8 @@
     "prop-types": "^15.7.2",
     "react": ">=19",
     "react-dom": ">=19",
-    "react-i18next": ">=15"
+    "react-i18next": ">=15",
+    "react-redux": "^8.0.0 || ^9.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.28.6",
@@ -129,6 +129,7 @@
     "prop-types": "^15.7.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-redux": "^9.2.0",
     "style-loader": "^4.0.0",
     "uuid": "^13.0.0"
   },
