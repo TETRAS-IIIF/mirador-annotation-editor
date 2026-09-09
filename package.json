@@ -25,6 +25,7 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/mirador-annotation-editor.es.js",
       "require": "./dist/mirador-annotation-editor.cjs.js"
     },
