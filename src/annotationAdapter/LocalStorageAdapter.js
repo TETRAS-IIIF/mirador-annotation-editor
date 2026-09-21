@@ -1,3 +1,5 @@
+import { convertIIIFAnnoToMaeData } from '../IIIFUtils';
+
 /** */
 export default class LocalStorageAdapter {
   /** */
@@ -67,7 +69,15 @@ export default class LocalStorageAdapter {
 
   /** */
   async all() {
-    return JSON.parse(localStorage.getItem(this.annotationPageId));
+    const annotationPage = JSON.parse(localStorage.getItem(this.annotationPageId));
+    // Mirrors AiiinotateAdapter: backfills maeData on annotations that weren't created through
+    // MAE's own form (e.g. seeded directly into a manifest's AnnotationPage), so the annotation
+    // list's hover action toolbar (gated on item.maeData - see CanvasListItem's editable())
+    // shows for them too, not just MAE-created ones.
+    if (annotationPage) {
+      annotationPage.items = annotationPage.items.map(convertIIIFAnnoToMaeData);
+    }
+    return annotationPage;
   }
 }
 
