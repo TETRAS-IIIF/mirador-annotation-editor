@@ -13,6 +13,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import InfoIcon from '@mui/icons-material/Info';
 import AnnotationActionsContext from './AnnotationActionsContext';
+import DeleteAnnotationDialog, { annotationTitle } from './DeleteAnnotationDialog';
 import WhoAndWhenFormSection, { TOOLTIP_MODE } from './annotationForm/WhoAndWhenFormSection';
 import HotkeyTooltip from "./hotkeys/HotkeyTooltip";
 
@@ -20,6 +21,8 @@ import HotkeyTooltip from "./hotkeys/HotkeyTooltip";
 const CanvasListItem = forwardRef((props, ref) => {
   const theme = useTheme();
   const [isHovering, setIsHovering] = useState(false);
+  // Delete asks first, like the Delete/Backspace hotkey does.
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const context = useContext(AnnotationActionsContext);
 
   const annotationData = useMemo(() => {
@@ -193,7 +196,7 @@ const CanvasListItem = forwardRef((props, ref) => {
                 <span>
                   <ToggleButton
                     aria-label="Delete"
-                    onClick={handleDelete}
+                    onClick={() => setIsConfirmingDelete(true)}
                     value="delete"
                     disabled={!context.annotationEditCompanionWindowIsOpened}
                   >
@@ -206,6 +209,15 @@ const CanvasListItem = forwardRef((props, ref) => {
         </div>
 
       )}
+      <DeleteAnnotationDialog
+        onCancel={() => setIsConfirmingDelete(false)}
+        onConfirm={() => {
+          setIsConfirmingDelete(false);
+          handleDelete();
+        }}
+        open={isConfirmingDelete}
+        title={annotationTitle(annotationData, context.config?.language)}
+      />
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
       <li {...props}>
         {props.children}
