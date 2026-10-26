@@ -9,6 +9,10 @@ Entries types:
 - `FIXED` for any bug fixes.
 - `SECURITY` to invite users to upgrade in case of vulnerabilities.
 
+## [Unreleased]
+
+- FIXED : Compatibility with Mirador 4.3 / MUI 9 (#273). Drop the `@mui/system` peer dependency so the MUI version follows Mirador's (MUI 7 for Mirador 4.2.x, MUI 9 for Mirador 4.3+)
+
 ## [1.3.3 ]
 
 - SECURITY : Update dependencies to fix vulnerabilities

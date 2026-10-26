@@ -9,7 +9,7 @@ import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
-import { styled } from '@mui/system';
+import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
