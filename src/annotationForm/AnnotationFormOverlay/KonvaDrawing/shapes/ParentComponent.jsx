@@ -200,7 +200,7 @@ ParentComponent.propTypes = {
   onShapeClick: PropTypes.func.isRequired,
   onTransform: PropTypes.func.isRequired,
   scale: PropTypes.number.isRequired,
-  selectedShapeId: PropTypes.string.isRequired,
+  selectedShapeId: PropTypes.string,
   shapes: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
     rotation: PropTypes.number,

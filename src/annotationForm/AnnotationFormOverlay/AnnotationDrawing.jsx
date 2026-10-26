@@ -752,10 +752,8 @@ AnnotationDrawing.propTypes = {
   setDrawingState: PropTypes.func.isRequired,
   setToolState: PropTypes.func.isRequired,
   tabView: PropTypes.string.isRequired,
-  toolState: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]).isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  toolState: PropTypes.object.isRequired,
   updateCurrentShapeInShapes: PropTypes.func.isRequired,
   updateScale: PropTypes.func.isRequired,
   windowId: PropTypes.string.isRequired,
