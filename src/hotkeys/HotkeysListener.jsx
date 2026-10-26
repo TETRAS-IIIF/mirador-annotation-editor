@@ -2,11 +2,7 @@ import { useEffect } from 'react';
 import { useStore } from 'react-redux';
 import { getFocusedWindowId, getConfig } from 'mirador';
 import HOTKEY_ACTIONS from './hotkeysDefinitions';
-
-/** Elements where keystrokes should NOT trigger hotkeys */
-const IGNORED_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
-/** Check if target is editable */
-const isEditableTarget = (el) => IGNORED_TAGS.has(el?.tagName) || el?.isContentEditable;
+import { isEditableTarget } from './hotkeysEvents';
 
 // Track the active handler so we can always clean up correctly,
 // even if React unmounts/remounts due to error boundaries.
