@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import DeleteAnnotationDialog, { annotationTitle } from '../src/DeleteAnnotationDialog';
 import { render, screen } from './test-utils';
 
+/** An identifying TextualBody in the given language */
 const title = (language, value) => ({
   language, purpose: 'identifying', type: 'TextualBody', value,
 });

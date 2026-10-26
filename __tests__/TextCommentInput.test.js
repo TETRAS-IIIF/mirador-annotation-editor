@@ -1,3 +1,4 @@
+/* eslint-disable no-script-url -- javascript: URLs are the payload under test */
 import { sanitizeTemplateHtml } from '../src/annotationForm/templates/templateComponents/TextCommentInput';
 
 // Regression test: the merge-confirmation dialog in TextCommentInput previews a comment

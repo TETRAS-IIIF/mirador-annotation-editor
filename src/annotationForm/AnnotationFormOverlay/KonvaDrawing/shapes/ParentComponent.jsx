@@ -21,7 +21,7 @@ function ParentComponent({
   onShapeClick,
   onTransform,
   scale,
-  selectedShapeId,
+  selectedShapeId = null,
   shapes,
   trview,
 }) {
@@ -200,6 +200,7 @@ ParentComponent.propTypes = {
   onShapeClick: PropTypes.func.isRequired,
   onTransform: PropTypes.func.isRequired,
   scale: PropTypes.number.isRequired,
+  // eslint-disable-next-line react/require-default-props -- defaulted in the signature
   selectedShapeId: PropTypes.string,
   shapes: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
