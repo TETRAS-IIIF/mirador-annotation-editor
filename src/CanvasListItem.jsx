@@ -15,6 +15,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import AnnotationActionsContext from './AnnotationActionsContext';
 import WhoAndWhenFormSection, { TOOLTIP_MODE } from './annotationForm/WhoAndWhenFormSection';
 import HotkeyTooltip from "./hotkeys/HotkeyTooltip";
+import { getDraftMarker, isDraft } from './draftUtils';
+import { DraftItemActions } from './DraftActions';
 
 // TODO missing TRAD
 const CanvasListItem = forwardRef((props, ref) => {
@@ -22,30 +24,34 @@ const CanvasListItem = forwardRef((props, ref) => {
   const [isHovering, setIsHovering] = useState(false);
   const context = useContext(AnnotationActionsContext);
 
-  const annotationData = useMemo(() => {
+  const [annotationData, annotationCanvasId] = useMemo(() => {
     const { annotationid } = props;
     const {
       canvases,
       annotationsOnCanvases,
     } = context;
     let annotation;
+    let canvasId;
     canvases.some((canvas) => {
       if (annotationsOnCanvases[canvas.id]) {
         Object.entries(annotationsOnCanvases[canvas.id])
           .forEach(([key, value]) => {
-            if (value.json && value.json.items) {
+            if (!annotation && value.json && value.json.items) {
               annotation = value.json.items.find((anno) => anno.id === annotationid);
               if (annotation) {
-                return annotation;
+                canvasId = canvas.id;
               }
             }
           });
       }
       return (annotation);
     });
-    return annotation;
+    return [annotation, canvasId];
     // include context deps to avoid stale reads when style-only changes are present
   }, [props.annotationid, context.canvases, context.annotationsOnCanvases]);
+
+  const draftMarker = getDraftMarker(context.config);
+  const draft = isDraft(annotationData, draftMarker);
 
   /**
      * Handle deletion of annotation.
@@ -100,7 +106,8 @@ const CanvasListItem = forwardRef((props, ref) => {
         return flatten(Object.entries(annotationsOnCanvases[canvas.id])
           .map(([key, value]) => {
             if (value.json && value.json.items) {
-              return value.json.items.filter((item) => item.maeData)
+              // Drafts are editable too: the editor builds their maeData.
+              return value.json.items.filter((item) => item.maeData || isDraft(item, draftMarker))
                 .map((item) => item.id);
             }
             return [];
@@ -210,6 +217,15 @@ const CanvasListItem = forwardRef((props, ref) => {
       <li {...props}>
         {props.children}
       </li>
+      {draft && annotationCanvasId && context.config?.annotation?.readonly !== true && (
+        <DraftItemActions
+          annotation={annotationData}
+          canvasId={annotationCanvasId}
+          marker={draftMarker}
+          receiveAnnotation={context.receiveAnnotation}
+          storageAdapter={context.storageAdapter}
+        />
+      )}
     </div>
   );
 });

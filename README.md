@@ -128,6 +128,23 @@ See `demo/src/index.js` for a full configuration sample.
 };
 ```
 
+### Draft annotations
+
+Draft annotations are suggestions waiting for review, for example written by an assistant. They are recognized with a marker set in Mirador's `annotations` settings (the same setting the viewer uses to draw drafts, when it supports it):
+
+```js
+annotations: {
+  draftMarker: {
+    property: 'status', value: 'draft', // annotation.status === 'draft'
+    modelProperty: 'model', batchProperty: 'batch', // optional, shown in the editor banner
+  },
+},
+```
+
+- In the annotation list, a draft shows a badge with **Reject** / **Accept**; under the list, **Reject all** / **Accept all** act on the drafts of the visible canvases.
+- In the editor, a banner says who suggested the draft. **Save** publishes it with the edits (the marker is removed). **Reject** deletes it.
+- Accept calls `adapter.accept(annotationId)` when the adapter has it, otherwise it saves the annotation without the marker. Bulk actions use `adapter.acceptAll()` / `adapter.rejectAll()` when available, otherwise they go one annotation at a time. Reject uses `adapter.delete`.
+
 ### External annotation templates
 
 **Not to be confused with `commentTemplates` above**, which are pre-filled text snippets for a

@@ -22,6 +22,10 @@ import {
   scrollToSelectedAnnotation,
 } from './canvasAnnotationsPluginUtils';
 import { useContextParams } from '../contextParams';
+import { DraftsFooter } from '../DraftActions';
+import {
+  acceptAllDrafts, draftsOnCanvases, getDraftMarker, isDraft, rejectAllDrafts,
+} from '../draftUtils';
 
 // TODO Attention merge M4upstream
 /**
@@ -120,13 +124,30 @@ function CanvasAnnotationsWrapper({
       if (!anno) return false;
       return Object.values(anno).some((value) => {
         if (value.json && value.json.items) {
-          // need maeData property for edition
-          return value.json.items.some((item) => item.id === annotationId && item.maeData);
+          // need maeData property for edition (drafts get it when opened)
+          return value.json.items.some((item) => item.id === annotationId
+            && (item.maeData || isDraft(item, getDraftMarker(config))));
         }
         return false;
       });
     });
-  }, [canvases, annotationsOnCanvases]);
+  }, [canvases, annotationsOnCanvases, config]);
+
+  const draftMarker = getDraftMarker(config);
+  const drafts = useMemo(
+    () => draftsOnCanvases(canvases, annotationsOnCanvases, draftMarker),
+    [canvases, annotationsOnCanvases, draftMarker],
+  );
+
+  /** Runs a bulk draft action on each visible canvas that has drafts. */
+  const onEachCanvasWithDrafts = (action) => Promise.all(
+    [...new Set(drafts.map((d) => d.canvasId))].map(async (canvasId) => {
+      const adapter = config.annotation.adapter(canvasId);
+      const own = drafts.filter((d) => d.canvasId === canvasId).map((d) => d.annotation);
+      const page = await action(adapter, own);
+      receiveAnnotation(canvasId, adapter.annotationPageId, page);
+    }),
+  ).catch((error) => console.error('Draft action failed', error));
 
   const wasCloseCompanionWindowRef = useRef(annotationEditCompanionWindowIsOpened);
   useEffect(() => {
@@ -196,6 +217,17 @@ function CanvasAnnotationsWrapper({
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
         <TargetComponent {...props} />
       </div>
+      {config.annotation?.readonly !== true && (
+        <DraftsFooter
+          count={drafts.length}
+          onAcceptAll={() => onEachCanvasWithDrafts(
+            (adapter, own) => acceptAllDrafts(adapter, own, draftMarker),
+          )}
+          onRejectAll={() => onEachCanvasWithDrafts(
+            (adapter, own) => rejectAllDrafts(adapter, own),
+          )}
+        />
+      )}
 
       {windowViewType !== 'single' && (
         <SingleCanvasDialog
