@@ -97,6 +97,36 @@ export function showKonvaStage() {
 }
 
 /**
+ * `exportStageSVG` (via the `svgcanvas` shim it uses to record Konva's canvas draw calls
+ * as SVG) draws an opaque white `<rect>` covering the whole stage whenever it sees a
+ * `clearRect` call under a non-identity transform matrix. Konva's per-layer `clear()` ends
+ * up in exactly that situation whenever the browser's `devicePixelRatio` isn't 1 (i.e. any
+ * retina/high-DPI screen), since the pixel-ratio scale is still applied to the transform at
+ * that point. This bakes a stray opaque white box into every exported annotation target on
+ * such screens (see issue #267).
+ *
+ * Real annotation shapes always get an explicit, real-color `stroke` set by `cleanNode`
+ * below, so a `<rect>` with no stroke - or with `stroke="none"`, which is how the
+ * `svgcanvas` shim itself writes out the artifact rect - can only be this export
+ * artifact, never user content, whenever its fill is opaque white. Safe to strip.
+ * @param {string} svg
+ * @returns {string}
+ */
+export function stripSpuriousWhiteBackgroundRect(svg) {
+  const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
+  doc.querySelectorAll('rect').forEach((rect) => {
+    const fill = (rect.getAttribute('fill') || '').trim().toLowerCase();
+    const isOpaqueWhite = fill === '#ffffff' || fill === '#fff' || fill === 'white';
+    const stroke = (rect.getAttribute('stroke') || 'none').trim().toLowerCase();
+    const hasNoRealStroke = stroke === 'none' || stroke === '';
+    if (isOpaqueWhite && hasNoRealStroke) {
+      rect.remove();
+    }
+  });
+  return new XMLSerializer().serializeToString(doc.documentElement);
+}
+
+/**
  * Get SVG picture containing all the stuff draw in the stage (Konva Stage).
  * This image will be put in overlay of the iiif media
  */
@@ -146,6 +176,7 @@ export async function getSvg(windowId) {
     });
 
   let svg = await exportStageSVG(stage, false); // TODO clean
+  svg = stripSpuriousWhiteBackgroundRect(svg);
   svg = svg.replaceAll('"', '\'');
   return svg;
 }

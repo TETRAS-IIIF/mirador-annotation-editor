@@ -3,18 +3,22 @@ import React, {
 } from 'react';
 import { ConnectedCompanionWindow } from 'mirador';
 import PropTypes from 'prop-types';
-import { Grid } from '@mui/material';
+import { Alert, Button, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
-import AnnotationFormTemplateSelector from './AnnotationFormTemplateSelector';
+import AnnotationFormTemplateSelector from './templates/AnnotationFormTemplateSelector';
 import {
-  getTemplateType, saveAnnotationInStorageAdapter, TEMPLATE, DEFAULT_FORM_MAP,
+  saveAnnotationInStorageAdapter, TEMPLATE, DEFAULT_FORM_MAP,
 } from './AnnotationFormUtils';
+import { getTemplateType } from './templates/registry';
 import { getContextParams } from '../contextParams';
 import AnnotationFormHeader from './AnnotationFormHeader';
 import AnnotationFormBody from './AnnotationFormBody';
 import '../custom.css';
 import UnsupportedMedia from './UnsupportedMedia';
+import {
+  draftProvenance, getDraftMarker, isDraft, withoutDraftMarker,
+} from '../draftUtils';
 
 /**
  * Component for submitting a form to create or edit an annotation.
@@ -32,6 +36,8 @@ function AnnotationForm(
   },
 ) {
   const { t } = useTranslation();
+  // TEMPLATE_REGISTRY (via getTemplateType) already defaults this to [] on its own if undefined.
+  const { externalTemplates } = config.annotation;
   const [templateType, setTemplateType] = useState(null);
   // eslint-disable-next-line no-underscore-dangle
   const [mediaType, setMediaType] = useState(playerReferences.getMediaType());
@@ -58,8 +64,13 @@ function AnnotationForm(
   if (!templateType) {
     if (annotation.id) {
       if (annotation.maeData && annotation.maeData.templateType) {
-        // Annotation has been created with MAE
-        setTemplateType(getTemplateType(t, annotation.maeData.templateType));
+        // Annotation has been created with MAE. Fall back to IIIF_TYPE (expert/raw mode,
+        // same as the "no maeData" branch below) if templateType isn't one the registry
+        // knows about, instead of crashing downstream on an undefined templateType.
+        setTemplateType(
+          getTemplateType(t, annotation.maeData.templateType, externalTemplates)
+            ?? getTemplateType(t, TEMPLATE.IIIF_TYPE),
+        );
       } else {
         // Annotation has been created with other IIIF annotation editor
         setTemplateType(getTemplateType(t, TEMPLATE.IIIF_TYPE));
@@ -151,19 +162,50 @@ function AnnotationForm(
    * @param {Object} annotationState - The annotation state to save
    * @returns {Promise} Promise that resolves when all annotations are saved
    */
+  const draftMarker = getDraftMarker(config);
+  const draft = isDraft(annotation, draftMarker);
+
+  /** Rejecting a draft from the editor deletes it, then closes the editor. */
+  const rejectDraft = () => Promise.all(
+    playerReferences.getCanvases().map(async (canvas) => {
+      const storageAdapter = config.annotation.adapter(canvas.id);
+      try {
+        const page = await storageAdapter.delete(annotation.id);
+        receiveAnnotation(canvas.id, storageAdapter.annotationPageId, page);
+      } catch (error) {
+        console.error('Could not reject draft', error);
+      }
+    }),
+  ).then(() => closeFormCompanionWindow());
+
   const saveAnnotation = (annotationState) => {
-    const annotationProps = annotationState;
+    // Saving a draft publishes it, with the user's edits.
+    const annotationProps = draft
+      ? withoutDraftMarker(annotationState, draftMarker)
+      : annotationState;
+    // Looked up once (not per-canvas below): templateType doesn't vary across canvases, and
+    // getTemplateType rebuilds the whole registry (icons included) on every call.
+    const registryEntry = annotationProps?.maeData?.templateType
+      ? getTemplateType(t, annotationProps.maeData.templateType, externalTemplates)
+      : undefined;
 
     const promises = playerReferences.getCanvases()
       .map(async (canvas) => {
         let annotationStateToBeSaved;
         if (annotationProps?.maeData && annotationProps.maeData.templateType) {
-          annotationStateToBeSaved = await convertAnnotationStateToBeSaved(
-            annotationProps,
-            canvas,
-            windowId,
-            playerReferences,
-          );
+          // Fall back to the shared converter directly for a templateType the registry
+          // doesn't know about (e.g. legacy/externally-sourced data), instead of throwing.
+          annotationStateToBeSaved = registryEntry
+            ? await registryEntry.convertToAnnotation(
+              annotationProps,
+              { canvas, playerReferences, windowId },
+            )
+            : await convertAnnotationStateToBeSaved(
+              annotationProps,
+              canvas,
+              windowId,
+              playerReferences,
+            );
         } else {
           annotationStateToBeSaved = annotationProps;
         }
@@ -196,6 +238,25 @@ function AnnotationForm(
         )
         : (
           <Grid container direction="column" spacing={1}>
+            {draft && (
+              <Grid>
+                <Alert
+                  severity="warning"
+                  data-testid="draft-banner"
+                  action={(
+                    <Button color="inherit" size="small" onClick={rejectDraft}>
+                      {t('reject')}
+                    </Button>
+                  )}
+                >
+                  {(() => {
+                    const { model, batch } = draftProvenance(annotation, draftMarker);
+                    const by = model ? t('draft_suggested_by', { model }) : t('draft_suggested');
+                    return `${by}${batch !== null && batch !== undefined ? ` · ${t('draft_batch', { batch })}` : ''}. ${t('draft_save_publishes')}`;
+                  })()}
+                </Alert>
+              </Grid>
+            )}
             <Grid container>
               <AnnotationFormHeader
                 setCommentingType={setTemplateType}
@@ -249,6 +310,8 @@ AnnotationForm.propTypes = {
       defaults: PropTypes.objectOf(
         PropTypes.oneOfType([PropTypes.bool, PropTypes.func, PropTypes.number, PropTypes.string]),
       ),
+      // eslint-disable-next-line react/forbid-prop-types
+      externalTemplates: PropTypes.arrayOf(PropTypes.object),
     }),
     language: PropTypes.string,
     // eslint-disable-next-line react/forbid-prop-types

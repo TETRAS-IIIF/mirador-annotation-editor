@@ -36,6 +36,7 @@ lot of technical and functional modifications (including migration from PaperJS 
     * [Use MAE with video annotation support](#use-mae-with-video-annotation-support)
     * [Persisting Annotations](#persisting-annotations)
     * [Configuration](#configuration-)
+    * [External annotation templates](#external-annotation-templates)
   * [Technical aspects from the original plugin](#technical-aspects-from-the-original-plugin)
   * [Contribute](#contribute)
     * [Contributor](#contributor)
@@ -123,8 +124,75 @@ See `demo/src/index.js` for a full configuration sample.
     quillConfig, // Configuration for the quill editor
     readonly: false, // If true, no annotation creation, edit, deleting is allowed
     tagsSuggestions: ['Mirador', 'Awesome', 'Viewer', 'IIIF', 'Template'], // Tags suggestions for autocompletion
+    externalTemplates: [], // Externally-registered annotation templates - see "External annotation templates" below
 };
 ```
+
+### Draft annotations
+
+Draft annotations are suggestions waiting for review, for example written by an assistant. They are recognized with a marker set in Mirador's `annotations` settings (the same setting the viewer uses to draw drafts, when it supports it):
+
+```js
+annotations: {
+  draftMarker: {
+    property: 'status', value: 'draft', // annotation.status === 'draft'
+    modelProperty: 'model', batchProperty: 'batch', // optional, shown in the editor banner
+  },
+},
+```
+
+- In the annotation list, a draft shows a badge with **Reject** / **Accept**; under the list, **Reject all** / **Accept all** act on the drafts of the visible canvases.
+- In the editor, a banner says who suggested the draft. **Save** publishes it with the edits (the marker is removed). **Reject** deletes it.
+- Accept calls `adapter.accept(annotationId)` when the adapter has it, otherwise it saves the annotation without the marker. Bulk actions use `adapter.acceptAll()` / `adapter.rejectAll()` when available, otherwise they go one annotation at a time. Reject uses `adapter.delete`.
+
+### External annotation templates
+
+**Not to be confused with `commentTemplates` above**, which are pre-filled text snippets for a
+note/tag's text field. This section is about registering a whole new *annotation type* - a new
+UI and a new way of saving what the user creates, alongside the built-in Note, Tag, and expert
+JSON mode.
+
+MAE's built-in annotation templates are entries in an internal template registry. As of the
+template-registry migration
+([tetras-dfb/root_repo#12](https://github.com/Tetras-dfb/root_repo/issues/12)), you can register
+your own annotation template alongside them via `config.annotation.externalTemplates`: an array
+of entries following the same contract as a built-in one.
+
+```js
+import { templateKit } from 'mirador-annotation-editor';
+
+const { AnnotationFormFooter } = templateKit; // reuse MAE's own building blocks in your template
+
+const myTemplate = {
+  // A unique id. Never reuse a built-in TEMPLATE.* value ('multiple_body', 'tagging', 'iiif',
+  // 'text') - a colliding id is dropped (with a console warning) rather than overriding the
+  // built-in entry.
+  id: 'my-plugin/my-template',
+  label: 'My Template', // shown on the picker card
+  description: 'What this template is for', // shown on the picker card
+  icon: null, // a React element, or null
+  isCompatibleWithMediaType: (mediaType) => mediaType === 'Image', // MEDIA_TYPES.IMAGE/AUDIO/VIDEO/UNKNOWN
+  selectable: true, // false hides it from the picker (reachable only by loading existing data with this id)
+  Component: MyTemplateComponent, // receives the same props every built-in template does:
+                                   // annotation, canvases, closeFormCompanionWindow,
+                                   // playerReferences, saveAnnotation, t, windowId
+  convertToAnnotation: async (state, { canvas, windowId, playerReferences }) => {
+    // Turn your component's annotationState into a savable IIIF annotation (set `.target`,
+    // shape `.body`, etc.) and return it.
+    return { ...state, target: canvas.id };
+  },
+};
+
+let annotationConfig = {
+  // ... your other options ...
+  externalTemplates: [myTemplate],
+};
+```
+
+See `src/annotationForm/templates/examples/exampleExternalTemplate.jsx` for a complete, tested
+example (a minimal whole-canvas star-rating template) and
+`src/annotationForm/templates/registry.jsx`'s `TEMPLATE_REGISTRY` JSDoc for the full contract
+reference.
 
 ## Technical aspects from the original plugin
 

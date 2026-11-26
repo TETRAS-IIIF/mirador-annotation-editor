@@ -10,42 +10,51 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import flatten from 'lodash/flatten';
 import { Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { useTranslation, withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import InfoIcon from '@mui/icons-material/Info';
 import AnnotationActionsContext from './AnnotationActionsContext';
+import DeleteAnnotationDialog, { annotationTitle } from './DeleteAnnotationDialog';
 import WhoAndWhenFormSection, { TOOLTIP_MODE } from './annotationForm/WhoAndWhenFormSection';
 import HotkeyTooltip from "./hotkeys/HotkeyTooltip";
+import { getDraftMarker, isDraft } from './draftUtils';
+import { DraftItemActions } from './DraftActions';
 
 // TODO missing TRAD
 const CanvasListItem = forwardRef((props, ref) => {
   const theme = useTheme();
   const [isHovering, setIsHovering] = useState(false);
+  // Delete asks first, like the Delete/Backspace hotkey does.
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const context = useContext(AnnotationActionsContext);
 
-  const annotationData = useMemo(() => {
+  const [annotationData, annotationCanvasId] = useMemo(() => {
     const { annotationid } = props;
     const {
       canvases,
       annotationsOnCanvases,
     } = context;
     let annotation;
+    let canvasId;
     canvases.some((canvas) => {
       if (annotationsOnCanvases[canvas.id]) {
         Object.entries(annotationsOnCanvases[canvas.id])
           .forEach(([key, value]) => {
-            if (value.json && value.json.items) {
+            if (!annotation && value.json && value.json.items) {
               annotation = value.json.items.find((anno) => anno.id === annotationid);
               if (annotation) {
-                return annotation;
+                canvasId = canvas.id;
               }
             }
           });
       }
       return (annotation);
     });
-    return annotation;
+    return [annotation, canvasId];
     // include context deps to avoid stale reads when style-only changes are present
   }, [props.annotationid, context.canvases, context.annotationsOnCanvases]);
+
+  const draftMarker = getDraftMarker(context.config);
+  const draft = isDraft(annotationData, draftMarker);
 
   /**
      * Handle deletion of annotation.
@@ -100,7 +109,8 @@ const CanvasListItem = forwardRef((props, ref) => {
         return flatten(Object.entries(annotationsOnCanvases[canvas.id])
           .map(([key, value]) => {
             if (value.json && value.json.items) {
-              return value.json.items.filter((item) => item.maeData)
+              // Drafts are editable too: the editor builds their maeData.
+              return value.json.items.filter((item) => item.maeData || isDraft(item, draftMarker))
                 .map((item) => item.id);
             }
             return [];
@@ -193,7 +203,7 @@ const CanvasListItem = forwardRef((props, ref) => {
                 <span>
                   <ToggleButton
                     aria-label="Delete"
-                    onClick={handleDelete}
+                    onClick={() => setIsConfirmingDelete(true)}
                     value="delete"
                     disabled={!context.annotationEditCompanionWindowIsOpened}
                   >
@@ -206,10 +216,28 @@ const CanvasListItem = forwardRef((props, ref) => {
         </div>
 
       )}
+      <DeleteAnnotationDialog
+        onCancel={() => setIsConfirmingDelete(false)}
+        onConfirm={() => {
+          setIsConfirmingDelete(false);
+          handleDelete();
+        }}
+        open={isConfirmingDelete}
+        title={annotationTitle(annotationData, context.config?.language)}
+      />
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
       <li {...props}>
         {props.children}
       </li>
+      {draft && annotationCanvasId && context.config?.annotation?.readonly !== true && (
+        <DraftItemActions
+          annotation={annotationData}
+          canvasId={annotationCanvasId}
+          marker={draftMarker}
+          receiveAnnotation={context.receiveAnnotation}
+          storageAdapter={context.storageAdapter}
+        />
+      )}
     </div>
   );
 });
@@ -220,4 +248,4 @@ CanvasListItem.propTypes = {
   children: PropTypes.oneOfType([PropTypes.func, PropTypes.node]).isRequired,
 };
 
-export default withTranslation()(CanvasListItem);
+export default CanvasListItem;

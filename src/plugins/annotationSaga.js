@@ -38,9 +38,7 @@ function* annotationSaga() {
 }
 
 const annotationSagaPlugin = {
-  mode: 'wrap',
   saga: annotationSaga,
-  target: 'Window',
 };
 
 export default annotationSagaPlugin;

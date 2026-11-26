@@ -11,3 +11,4 @@ npm-debug.log*
 /dist
 out
 .DS_Store
+.claude/worktrees/

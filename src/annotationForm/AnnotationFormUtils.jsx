@@ -1,7 +1,3 @@
-import TextFieldsIcon from '@mui/icons-material/TextFields';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import DataObjectIcon from '@mui/icons-material/DataObject';
-import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { styled } from '@mui/material/styles';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -29,47 +25,6 @@ export const MEDIA_TYPES = {
   VIDEO: 'Video',
 };
 
-/** Return template type * */
-export const getTemplateType = (t, templateType) => TEMPLATE_TYPES(t)
-  .find(
-    (type) => type.id === templateType,
-  );
-
-/**
- * List of the template types supported
- */
-export const TEMPLATE_TYPES = (t) => [
-  {
-    description: t('textual_note_with_target'),
-    icon: <TextFieldsIcon />,
-    id: TEMPLATE.MULTIPLE_BODY_TYPE,
-    isCompatibleWithTemplate: (mediaType) => {
-      if (mediaType === MEDIA_TYPES.IMAGE) return true;
-      return false;
-    },
-    label: t('note'),
-  },
-  {
-    description: t('tag_with_target'),
-    icon: <LocalOfferIcon fontSize="small" />,
-    id: TEMPLATE.TAGGING_TYPE,
-    isCompatibleWithTemplate: (mediaType) => {
-      if (mediaType === MEDIA_TYPES.IMAGE) return true;
-      return false;
-    },
-    label: t('tag'),
-  },
-  {
-    description: t('edit_iiif_json_code'),
-    icon: <DataObjectIcon fontSize="small" />,
-    id: TEMPLATE.IIIF_TYPE,
-    isCompatibleWithTemplate: (mediaType) => {
-      if (mediaType === MEDIA_TYPES.IMAGE) return true;
-      return false;
-    },
-    label: t('expert_mode'),
-  },
-];
 export const DEFAULT_TOOL_STATE = {
   activeTool: OVERLAY_TOOL.SHAPE,
   closedMode: 'closed',
