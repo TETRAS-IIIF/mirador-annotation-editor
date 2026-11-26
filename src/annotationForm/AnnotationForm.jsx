@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { ConnectedCompanionWindow } from 'mirador';
 import PropTypes from 'prop-types';
-import { Grid } from '@mui/material';
+import { Alert, Button, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { convertAnnotationStateToBeSaved } from '../IIIFUtils';
 import AnnotationFormTemplateSelector from './templates/AnnotationFormTemplateSelector';
@@ -16,6 +16,9 @@ import AnnotationFormHeader from './AnnotationFormHeader';
 import AnnotationFormBody from './AnnotationFormBody';
 import '../custom.css';
 import UnsupportedMedia from './UnsupportedMedia';
+import {
+  draftProvenance, getDraftMarker, isDraft, withoutDraftMarker,
+} from '../draftUtils';
 
 /**
  * Component for submitting a form to create or edit an annotation.
@@ -159,8 +162,27 @@ function AnnotationForm(
    * @param {Object} annotationState - The annotation state to save
    * @returns {Promise} Promise that resolves when all annotations are saved
    */
+  const draftMarker = getDraftMarker(config);
+  const draft = isDraft(annotation, draftMarker);
+
+  /** Rejecting a draft from the editor deletes it, then closes the editor. */
+  const rejectDraft = () => Promise.all(
+    playerReferences.getCanvases().map(async (canvas) => {
+      const storageAdapter = config.annotation.adapter(canvas.id);
+      try {
+        const page = await storageAdapter.delete(annotation.id);
+        receiveAnnotation(canvas.id, storageAdapter.annotationPageId, page);
+      } catch (error) {
+        console.error('Could not reject draft', error);
+      }
+    }),
+  ).then(() => closeFormCompanionWindow());
+
   const saveAnnotation = (annotationState) => {
-    const annotationProps = annotationState;
+    // Saving a draft publishes it, with the user's edits.
+    const annotationProps = draft
+      ? withoutDraftMarker(annotationState, draftMarker)
+      : annotationState;
     // Looked up once (not per-canvas below): templateType doesn't vary across canvases, and
     // getTemplateType rebuilds the whole registry (icons included) on every call.
     const registryEntry = annotationProps?.maeData?.templateType
@@ -216,6 +238,25 @@ function AnnotationForm(
         )
         : (
           <Grid container direction="column" spacing={1}>
+            {draft && (
+              <Grid>
+                <Alert
+                  severity="warning"
+                  data-testid="draft-banner"
+                  action={(
+                    <Button color="inherit" size="small" onClick={rejectDraft}>
+                      {t('reject')}
+                    </Button>
+                  )}
+                >
+                  {(() => {
+                    const { model, batch } = draftProvenance(annotation, draftMarker);
+                    const by = model ? t('draft_suggested_by', { model }) : t('draft_suggested');
+                    return `${by}${batch !== null && batch !== undefined ? ` · ${t('draft_batch', { batch })}` : ''}. ${t('draft_save_publishes')}`;
+                  })()}
+                </Alert>
+              </Grid>
+            )}
             <Grid container>
               <AnnotationFormHeader
                 setCommentingType={setTemplateType}
