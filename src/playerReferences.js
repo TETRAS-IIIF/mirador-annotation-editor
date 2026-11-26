@@ -5,6 +5,25 @@ import {
 } from 'mirador';
 import { MEDIA_TYPES } from './annotationForm/AnnotationFormUtils';
 
+/** ***********************
+ * Get media type of visible canvas
+ * @param state
+ * @param windowId
+ */
+export function checkMediaType(state, windowId) {
+  const audioResources = getVisibleCanvasAudioResources(state, { windowId }) || [];
+  const videoResources = getVisibleCanvasVideoResources(state, { windowId }) || [];
+
+  if (videoResources.length > 0) {
+    return MEDIA_TYPES.VIDEO;
+  }
+  if (audioResources.length > 0) {
+    return MEDIA_TYPES.AUDIO;
+  }
+
+  return MEDIA_TYPES.IMAGE;
+}
+
 /** */
 export class WindowPlayer {
   actions;
@@ -174,13 +193,8 @@ export class WindowPlayer {
    */
   getDisplayedMediaHeight() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const viewer = this.media.current;
-      if (viewer) {
-        const percentageHeight = this.getMediaTrueHeight() * viewer.viewport.getZoom();
-        const containerWidth = viewer.container.clientWidth;
-        const actualHeightInPixels = Math.round(containerWidth * percentageHeight);
-        return actualHeightInPixels;
-      }
+      const bounds = this.getCanvasBoundsInViewerPixels();
+      if (bounds) return Math.round(Math.abs(bounds.bottomRight.y - bounds.topLeft.y));
     }
     return undefined;
   }
@@ -191,13 +205,8 @@ export class WindowPlayer {
    */
   getDisplayedMediaWidth() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const viewer = this.media.current;
-      if (viewer && viewer.world.getItemCount() > 0) {
-        const percentageWidth = this.getMediaTrueWidth() * viewer.viewport.getZoom();
-        const containerWidth = viewer.container.clientWidth;
-        const actualWidthInPixels = Math.round(containerWidth * percentageWidth);
-        return actualWidthInPixels;
-      }
+      const bounds = this.getCanvasBoundsInViewerPixels();
+      if (bounds) return Math.round(Math.abs(bounds.bottomRight.x - bounds.topLeft.x));
     }
     return undefined;
   }
@@ -260,23 +269,48 @@ export class WindowPlayer {
    */
   getImagePosition() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const viewer = this.media.current;
-      if (viewer) {
-        // Assuming one image in OpenSeadragon for now
-        const tiledImage = viewer.world.getItemAt(0);
-        // Get the bounds of the image in viewport coordinates
-        const bounds = tiledImage.getBounds();
-        // Convert the top-left corner of the bounds to pixel coordinates
-        const topLeft = viewer.viewport.viewportToViewerElementCoordinates(bounds.getTopLeft());
-        // Round the coordinates for consistency
-        const position = {
-          x: Math.round(topLeft.x),
-          y: Math.round(topLeft.y),
+      const bounds = this.getCanvasBoundsInViewerPixels();
+      if (bounds) {
+        return {
+          x: Math.round(bounds.topLeft.x),
+          y: Math.round(bounds.topLeft.y),
         };
-        return position;
       }
     }
     return undefined;
+  }
+
+  /**
+   * Get the canvas bounds converted to viewer-element pixels.
+   *
+   * Annotation targets are in canvas coordinates, so the drawing area must cover the canvas, not
+   * the image painted on it: the image can be smaller than the canvas (other aspect ratio, or
+   * painted on a `#xywh` fragment). In single-canvas view Mirador lays the canvas out in world
+   * coordinates at (0, 0), one unit per canvas pixel.
+   * @returns {undefined|{topLeft: {x:number, y:number}, bottomRight: {x:number, y:number}}}
+   */
+  getCanvasBoundsInViewerPixels() {
+    if (this.mediaType !== MEDIA_TYPES.IMAGE) {
+      return undefined;
+    }
+    const viewer = this.media?.current;
+    if (!viewer || !viewer.world || viewer.world.getItemCount() <= 0 || !viewer.viewport) {
+      return undefined;
+    }
+    const width = this.getMediaTrueWidth();
+    const height = this.getMediaTrueHeight();
+    if (!width || !height) return undefined;
+
+    // Build OpenSeadragon Points from one it returns: MAE doesn't depend on openseadragon directly
+    const origin = viewer.viewport.getCenter(true).times(0);
+    const topLeft = viewer.viewport.viewportToViewerElementCoordinates(origin);
+    const bottomRight = viewer.viewport.viewportToViewerElementCoordinates(
+      origin.plus({ x: width, y: height }),
+    );
+    if (!topLeft || !bottomRight) {
+      return undefined;
+    }
+    return { bottomRight, topLeft };
   }
 
   /**
@@ -287,23 +321,4 @@ export class WindowPlayer {
     return Math.max(this.getDisplayedMediaWidth() / 500, 3);
     // TODO DAxid
   }
-}
-
-/** ***********************
- * Get media type of visible canvas
- * @param state
- * @param windowId
- */
-export function checkMediaType(state, windowId) {
-  const audioResources = getVisibleCanvasAudioResources(state, { windowId }) || [];
-  const videoResources = getVisibleCanvasVideoResources(state, { windowId }) || [];
-
-  if (videoResources.length > 0) {
-    return MEDIA_TYPES.VIDEO;
-  }
-  if (audioResources.length > 0) {
-    return MEDIA_TYPES.AUDIO;
-  }
-
-  return MEDIA_TYPES.IMAGE;
 }
