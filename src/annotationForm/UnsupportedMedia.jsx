@@ -10,7 +10,7 @@ export default function UnsupportedMedia({ id, windowId, mediaType }) {
   const { t } = useTranslation();
   return (
     <CompanionWindow title={t('media_not_supported')} windowId={windowId} id={id}>
-      <Grid container padding={1} spacing={1}>
+      <Grid container spacing={1} sx={{ padding: 1 }}>
         <Grid>
           <Typography>{t('media_not_supported')}</Typography>
         </Grid>

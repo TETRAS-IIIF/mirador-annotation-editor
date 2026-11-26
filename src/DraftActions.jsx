@@ -30,9 +30,9 @@ export function DraftItemActions({
     <Stack
       direction="row"
       spacing={1}
-      alignItems="center"
-      justifyContent="flex-end"
-      sx={{ pb: 1, pr: 1 }}
+      sx={{
+        alignItems: 'center', justifyContent: 'flex-end', pb: 1, pr: 1,
+      }}
       data-testid="draft-actions"
     >
       <Chip size="small" color="warning" variant="outlined" label={t('draft_badge')} />
@@ -84,8 +84,9 @@ export function DraftsFooter({ count, onAcceptAll, onRejectAll }) {
     <Stack
       direction="row"
       spacing={1}
-      alignItems="center"
-      sx={{ borderTop: 1, borderColor: 'divider', px: 2, py: 1 }}
+      sx={{
+        alignItems: 'center', borderColor: 'divider', borderTop: 1, px: 2, py: 1,
+      }}
       data-testid="drafts-footer"
     >
       <span style={{ flexGrow: 1 }}>{t('drafts_count', { count })}</span>
