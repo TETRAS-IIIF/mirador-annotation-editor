@@ -11,6 +11,9 @@ Entries types:
 
 ## [Unreleased]
 
+- FIXED : MUI 9: layout props (`alignItems`, `justifyContent`, `padding`) moved into `sx` in the draft actions, the annotation form header and footer, and the unsupported-media panel; they were reaching the DOM
+- FIXED : Hotkey hints in tooltips render as `<kbd>` (they rendered an unknown `<hotkey>` element)
+
 - ADDED : Draft annotations (`annotations.draftMarker`): badge and Accept / Reject in the annotation list, Accept all / Reject all, editor banner; Save publishes a draft. Drafts without `maeData` open in the regular editor
 
 - FIXED : Compatibility with Mirador 4.3 / MUI 9 (#273). Drop the `@mui/system` peer dependency so the MUI version follows Mirador's (MUI 7 for Mirador 4.2.x, MUI 9 for Mirador 4.3+)
