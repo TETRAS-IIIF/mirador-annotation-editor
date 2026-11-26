@@ -1,4 +1,4 @@
-import { convertMultipleBodyAnnotationToBeSaved } from '../src/annotationForm/MultipleBodyTemplate';
+import { convertMultipleBodyAnnotationToBeSaved } from '../src/annotationForm/templates/builtin/MultipleBodyTemplate';
 import { isEmptyValue } from '../src/IIIFUtils';
 import { TARGET_TOOL_STATE } from '../src/annotationForm/AnnotationFormUtils';
 import { SHAPES_TOOL } from '../src/annotationForm/AnnotationFormOverlay/KonvaDrawing/KonvaUtils';

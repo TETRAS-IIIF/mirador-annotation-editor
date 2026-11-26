@@ -6,25 +6,25 @@ import AnnotationFormBody from '../src/annotationForm/AnnotationFormBody';
 import { TEMPLATE } from '../src/annotationForm/AnnotationFormUtils';
 import {
   getTemplateType, TEMPLATE_REGISTRY, TEMPLATE_TYPES,
-} from '../src/annotationForm/templateRegistry';
+} from '../src/annotationForm/templates/registry';
 
 // Dispatch tests for issue #12 (https://github.com/Tetras-dfb/root_repo/issues/12): AnnotationFormBody
-// renders whichever template component the registry (templateRegistry.jsx, Phase 1) maps a given
+// renders whichever template component the registry (templates/registry.jsx, Phase 1) maps a given
 // templateType.id to. These tests pin down that dispatch behavior.
 
-vi.mock('../src/annotationForm/TextCommentTemplate', () => ({
+vi.mock('../src/annotationForm/templates/builtin/TextCommentTemplate', () => ({
   convertTextCommentAnnotationToBeSaved: vi.fn(),
   default: () => <div data-testid="TextCommentTemplate" />,
 }));
-vi.mock('../src/annotationForm/TaggingTemplate', () => ({
+vi.mock('../src/annotationForm/templates/builtin/TaggingTemplate', () => ({
   convertTaggingAnnotationToBeSaved: vi.fn(),
   default: () => <div data-testid="TaggingTemplate" />,
 }));
-vi.mock('../src/annotationForm/IIIFTemplate', () => ({
+vi.mock('../src/annotationForm/templates/builtin/IIIFTemplate', () => ({
   convertIIIFAnnotationToBeSaved: vi.fn(),
   default: () => <div data-testid="IIIFTemplate" />,
 }));
-vi.mock('../src/annotationForm/MultipleBodyTemplate', () => ({
+vi.mock('../src/annotationForm/templates/builtin/MultipleBodyTemplate', () => ({
   convertMultipleBodyAnnotationToBeSaved: vi.fn(),
   default: () => <div data-testid="MultipleBodyTemplate" />,
 }));

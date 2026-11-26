@@ -1,4 +1,4 @@
-import { convertTextCommentAnnotationToBeSaved } from '../src/annotationForm/TextCommentTemplate';
+import { convertTextCommentAnnotationToBeSaved } from '../src/annotationForm/templates/builtin/TextCommentTemplate';
 import { isEmptyValue } from '../src/IIIFUtils';
 import { TARGET_TOOL_STATE } from '../src/annotationForm/AnnotationFormUtils';
 import { SHAPES_TOOL } from '../src/annotationForm/AnnotationFormOverlay/KonvaDrawing/KonvaUtils';

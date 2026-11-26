@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import { Stage } from 'react-konva';
 import { v4 as uuidv4 } from 'uuid';
 import ParentComponent from './KonvaDrawing/shapes/ParentComponent';
+import { isEditableTarget } from '../../hotkeys/hotkeysEvents';
 import { KONVA_MODE, OVERLAY_TOOL, SHAPES_TOOL } from './KonvaDrawing/KonvaUtils';
 
 /** All the stuff to draw on the canvas */
@@ -71,6 +72,9 @@ export default function AnnotationDrawing(
 
   /** */
   const handleKeyPress = (e) => {
+    // Registered on `window`, so it also sees keys typed in the form's own fields: a Backspace
+    // correcting the annotation's text must not delete the selected shape.
+    if (isEditableTarget(e.target)) return;
     e.stopPropagation();
 
     if (!drawingState.currentShape) {
@@ -752,10 +756,8 @@ AnnotationDrawing.propTypes = {
   setDrawingState: PropTypes.func.isRequired,
   setToolState: PropTypes.func.isRequired,
   tabView: PropTypes.string.isRequired,
-  toolState: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]).isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  toolState: PropTypes.object.isRequired,
   updateCurrentShapeInShapes: PropTypes.func.isRequired,
   updateScale: PropTypes.func.isRequired,
   windowId: PropTypes.string.isRequired,

@@ -25,9 +25,18 @@ function closeAnnotationCompanionWindows(state, dispatch, windowId) {
   });
 }
 
-/** Delete the currently selected shape */
+/** The selected annotation's raw JSON, from the window's visible canvases */
+function findAnnotation(state, windowId, annotationId) {
+  return getVisibleCanvases(state, { windowId })
+    .flatMap((canvas) => Object.values(state.annotations?.[canvas.id] ?? {}))
+    .flatMap((page) => page?.json?.items ?? [])
+    .find((item) => item.id === annotationId) ?? null;
+}
+
+/** Delete the currently selected shape - or, outside the edit form, the selected annotation
+ * itself, once `confirmDelete` (HotkeysListener's dialog, issue #460) has been answered */
 function deleteSelectedShape({
-  state, dispatch, windowId, config,
+  state, dispatch, windowId, config, confirmDelete = (annotation, performDelete) => performDelete(),
 }) {
   const companionWindows = getAnnotationCompanionWindows(state, windowId);
 
@@ -46,15 +55,17 @@ function deleteSelectedShape({
   const storageAdapter = config?.annotation?.adapter;
   if (!storageAdapter) return;
 
-  const canvases = getVisibleCanvases(state, { windowId });
-  canvases.forEach((canvas) => {
-    const adapter = storageAdapter(canvas.id);
-    adapter.delete(annotationId).then((annoPage) => {
-      dispatch(receiveAnnotation(canvas.id, adapter.annotationPageId, annoPage));
+  confirmDelete(findAnnotation(state, windowId, annotationId), () => {
+    const canvases = getVisibleCanvases(state, { windowId });
+    canvases.forEach((canvas) => {
+      const adapter = storageAdapter(canvas.id);
+      adapter.delete(annotationId).then((annoPage) => {
+        dispatch(receiveAnnotation(canvas.id, adapter.annotationPageId, annoPage));
+      });
     });
-  });
 
-  dispatch(deselectAnnotation(windowId));
+    dispatch(deselectAnnotation(windowId));
+  });
 }
 
 /** Save the current annotation */

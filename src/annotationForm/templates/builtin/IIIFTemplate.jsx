@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Paper } from '@mui/material';
 import { JsonEditor } from 'json-edit-react';
-import { templateKit } from './templateKit';
+import { templateKit } from '../kit';
 
 const { AnnotationFormFooter } = templateKit;
 

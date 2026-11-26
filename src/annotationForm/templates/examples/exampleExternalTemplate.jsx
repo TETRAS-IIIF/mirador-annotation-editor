@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Grid, Rating, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
-import { templateKit } from '../annotationForm/templateKit';
+import { templateKit } from '../kit';
 
 const { AnnotationFormFooter } = templateKit;
 
@@ -17,7 +17,7 @@ export const EXAMPLE_TEMPLATE_ID = 'example-org/rating-template';
 
 /**
  * The template's UI: receives the same props every built-in template does (see
- * AnnotationFormBody.jsx and templateRegistry.jsx's contract), even though this example only
+ * AnnotationFormBody.jsx and registry.jsx's contract), even though this example only
  * needs a few of them.
  * @param {object} annotation
  * @param {Function} closeFormCompanionWindow
@@ -82,7 +82,7 @@ export const convertExampleRatingAnnotationToBeSaved = async (state, { canvas })
 
 /**
  * The registry-entry-shaped descriptor for this example template: spread it (or your own
- * equivalent) into config.annotation.externalTemplates to register it. See templateRegistry.jsx's
+ * equivalent) into config.annotation.externalTemplates to register it. See registry.jsx's
  * TEMPLATE_REGISTRY JSDoc for the full contract every entry (built-in or external) follows.
  */
 export const exampleExternalTemplate = {

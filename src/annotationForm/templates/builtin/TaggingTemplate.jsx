@@ -4,11 +4,11 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { getConfig } from 'mirador';
-import { TEMPLATE } from './AnnotationFormUtils';
-import { resizeKonvaStage } from './AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
-import { getContextParams } from '../contextParams';
-import { convertSingleBodyAnnotationToBeSaved } from '../IIIFUtils';
-import { templateKit } from './templateKit';
+import { TEMPLATE } from '../../AnnotationFormUtils';
+import { resizeKonvaStage } from '../../AnnotationFormOverlay/KonvaDrawing/KonvaUtils';
+import { getContextParams } from '../../../contextParams';
+import { convertSingleBodyAnnotationToBeSaved } from '../../../IIIFUtils';
+import { templateKit } from '../kit';
 
 const { AnnotationFormFooter, TargetFormSection } = templateKit;
 

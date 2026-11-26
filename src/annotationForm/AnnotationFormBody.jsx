@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import { getConfig } from 'mirador';
 import './debug.css';
 import { DebugInformation } from './DebugInformation';
-import { TEMPLATE_REGISTRY } from './templateRegistry';
+import { TEMPLATE_REGISTRY } from './templates/registry';
 
 /**
  * This function contain the logic for loading annotation and render proper template type

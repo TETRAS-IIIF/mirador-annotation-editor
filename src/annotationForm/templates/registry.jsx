@@ -2,11 +2,11 @@ import TextFieldsIcon from '@mui/icons-material/TextFields';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import React from 'react';
-import IIIFTemplate, { convertIIIFAnnotationToBeSaved } from './IIIFTemplate';
-import MultipleBodyTemplate, { convertMultipleBodyAnnotationToBeSaved } from './MultipleBodyTemplate';
-import TaggingTemplate, { convertTaggingAnnotationToBeSaved } from './TaggingTemplate';
-import TextCommentTemplate, { convertTextCommentAnnotationToBeSaved } from './TextCommentTemplate';
-import { MEDIA_TYPES, TEMPLATE } from './AnnotationFormUtils';
+import IIIFTemplate, { convertIIIFAnnotationToBeSaved } from './builtin/IIIFTemplate';
+import MultipleBodyTemplate, { convertMultipleBodyAnnotationToBeSaved } from './builtin/MultipleBodyTemplate';
+import TaggingTemplate, { convertTaggingAnnotationToBeSaved } from './builtin/TaggingTemplate';
+import TextCommentTemplate, { convertTextCommentAnnotationToBeSaved } from './builtin/TextCommentTemplate';
+import { MEDIA_TYPES, TEMPLATE } from '../AnnotationFormUtils';
 
 /** Only IMAGE canvases support any of today's templates */
 const imageOnly = (mediaType) => mediaType === MEDIA_TYPES.IMAGE;
@@ -38,7 +38,8 @@ const imageOnly = (mediaType) => mediaType === MEDIA_TYPES.IMAGE;
  *
  * Phase 5 (tetras-dfb/root_repo#12): open for external registration via
  * `config.annotation.externalTemplates`, an array of entries following this same contract - see the
- * README's "External templates" section and src/examples/exampleExternalTemplate.jsx for a
+ * README's "External templates" section and
+ * src/annotationForm/templates/examples/exampleExternalTemplate.jsx for a
  * complete, tested example. An external entry whose id collides with a built-in TEMPLATE.*
  * constant is dropped (with a console.warn) rather than silently overriding it.
  * @param {Function} t - i18next translation function
