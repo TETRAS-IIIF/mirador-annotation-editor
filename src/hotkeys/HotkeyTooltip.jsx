@@ -37,7 +37,7 @@ export default function HotkeyTooltip({ label, action }) {
     <Typography variant="body2" component="span" sx={{ alignItems: 'center', display: 'inline-flex' }}>
       {label}
       {keys.map((k) => (
-        <Typography key={k} component="HotKey" variant="caption" sx={hkSx}>
+        <Typography key={k} component="kbd" variant="caption" sx={hkSx}>
           {k}
         </Typography>
       ))}
