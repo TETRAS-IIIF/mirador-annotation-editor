@@ -193,7 +193,7 @@ export class WindowPlayer {
    */
   getDisplayedMediaHeight() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const bounds = this.getImageBoundsInViewerPixels();
+      const bounds = this.getCanvasBoundsInViewerPixels();
       if (bounds) return Math.round(Math.abs(bounds.bottomRight.y - bounds.topLeft.y));
     }
     return undefined;
@@ -205,7 +205,7 @@ export class WindowPlayer {
    */
   getDisplayedMediaWidth() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const bounds = this.getImageBoundsInViewerPixels();
+      const bounds = this.getCanvasBoundsInViewerPixels();
       if (bounds) return Math.round(Math.abs(bounds.bottomRight.x - bounds.topLeft.x));
     }
     return undefined;
@@ -269,7 +269,7 @@ export class WindowPlayer {
    */
   getImagePosition() {
     if (this.mediaType === MEDIA_TYPES.IMAGE) {
-      const bounds = this.getImageBoundsInViewerPixels();
+      const bounds = this.getCanvasBoundsInViewerPixels();
       if (bounds) {
         return {
           x: Math.round(bounds.topLeft.x),
@@ -281,10 +281,15 @@ export class WindowPlayer {
   }
 
   /**
-   * Get image bounds converted to viewer-element pixels.
+   * Get the canvas bounds converted to viewer-element pixels.
+   *
+   * Annotation targets are in canvas coordinates, so the drawing area must cover the canvas, not
+   * the image painted on it: the image can be smaller than the canvas (other aspect ratio, or
+   * painted on a `#xywh` fragment). In single-canvas view Mirador lays the canvas out in world
+   * coordinates at (0, 0), one unit per canvas pixel.
    * @returns {undefined|{topLeft: {x:number, y:number}, bottomRight: {x:number, y:number}}}
    */
-  getImageBoundsInViewerPixels() {
+  getCanvasBoundsInViewerPixels() {
     if (this.mediaType !== MEDIA_TYPES.IMAGE) {
       return undefined;
     }
@@ -292,17 +297,16 @@ export class WindowPlayer {
     if (!viewer || !viewer.world || viewer.world.getItemCount() <= 0 || !viewer.viewport) {
       return undefined;
     }
+    const width = this.getMediaTrueWidth();
+    const height = this.getMediaTrueHeight();
+    if (!width || !height) return undefined;
 
-    // Assuming one image in OpenSeadragon for now
-    const tiledImage = viewer.world.getItemAt(0);
-    if (!tiledImage || typeof tiledImage.getBounds !== 'function') return undefined;
-    const bounds = tiledImage.getBounds();
-    if (!bounds || typeof bounds.getTopLeft !== 'function' || typeof bounds.getBottomRight !== 'function') {
-      return undefined;
-    }
-
-    const topLeft = viewer.viewport.viewportToViewerElementCoordinates(bounds.getTopLeft());
-    const bottomRight = viewer.viewport.viewportToViewerElementCoordinates(bounds.getBottomRight());
+    // Build OpenSeadragon Points from one it returns: MAE doesn't depend on openseadragon directly
+    const origin = viewer.viewport.getCenter(true).times(0);
+    const topLeft = viewer.viewport.viewportToViewerElementCoordinates(origin);
+    const bottomRight = viewer.viewport.viewportToViewerElementCoordinates(
+      origin.plus({ x: width, y: height }),
+    );
     if (!topLeft || !bottomRight) {
       return undefined;
     }
