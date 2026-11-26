@@ -25,9 +25,7 @@ export default function AnnotationFormHeader(
     <Grid
       container
       direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      sx={{ marginRight: '10px' }}
+      sx={{ alignItems: 'center', justifyContent: 'space-between', marginRight: '10px' }}
       spacing={2}
     >
       <Grid>

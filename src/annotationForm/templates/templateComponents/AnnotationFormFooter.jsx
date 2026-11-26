@@ -42,7 +42,7 @@ function AnnotationFormFooter({
         )
       }
       <Divider sx={{ m: 1 }} />
-      <Grid sx={{ mt: 1 }} container spacing={1} justifyContent="flex-end">
+      <Grid sx={{ justifyContent: 'flex-end', mt: 1 }} container spacing={1}>
         <Tooltip title={<HotkeyTooltip label={t('cancel')} action="escape" />}>
           <Button
             sx={{ m: 1 }}
