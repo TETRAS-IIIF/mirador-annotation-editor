@@ -109,7 +109,7 @@ function AnnotationFormOverlay({
 
   return (
     <Grid container>
-      <OverlayIconAndTitleContainer item xs={12}>
+      <OverlayIconAndTitleContainer>
         <StyledToggleButtonGroup
           value={activeTool}
           exclusive

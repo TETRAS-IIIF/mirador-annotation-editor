@@ -13,6 +13,7 @@ Entries types:
 
 - FIXED : MUI 9: layout props (`alignItems`, `justifyContent`, `padding`) moved into `sx` in the draft actions, the annotation form header and footer, and the unsupported-media panel; they were reaching the DOM
 - FIXED : Hotkey hints in tooltips render as `<kbd>` (they rendered an unknown `<hotkey>` element)
+- FIXED : MUI 9: the overlay tool bar no longer passes Grid's legacy `item` / `xs` props, which reached the DOM. MUI 7 already ignored them, so the layout is unchanged
 
 - ADDED : Draft annotations (`annotations.draftMarker`): badge and Accept / Reject in the annotation list, Accept all / Reject all, editor banner; Save publishes a draft. Drafts without `maeData` open in the regular editor
 
